@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Vendor Dashboard" %} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Top Bar -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+      <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-1">
+        <i class="bi bi-speedometer2 me-1"></i>{% trans "Merchant Portal" %}
+      </span>
+      <h2 class="fw-bold text-dark mb-1">{{ active_shop.name }}</h2>
+      <p class="text-secondary small mb-0">
+        <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ active_shop.get_campus_zone_display }} &bull; {{ active_shop.specific_location }}
+      </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'market:shop_edit' active_shop.slug %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+        <i class="bi bi-pencil me-1"></i>{% trans "Edit Shop Profile" %}
+      </a>
+      <a href="{% url 'market:listing_create' active_shop.slug %}" class="btn btn-success fw-bold btn-sm rounded-pill px-3">
+        <i class="bi bi-plus-lg me-1"></i>{% trans "Add Product Listing" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Multi-Shop Tabs (if user manages multiple kiosks) -->
+  {% if user_shops.count > 1 %}
+    <ul class="nav nav-pills mb-4">
+      {% for shop in user_shops %}
+        <li class="nav-item">
+          <a class="nav-link {% if shop.id == active_shop.id %}active bg-success{% endif %}" href="?shop_id={{ shop.id }}">
+            {{ shop.name }}
+          </a>
+        </li>
+      {% endfor %}
+      <li class="nav-item">
+        <a class="nav-link text-success" href="{% url 'market:shop_create' %}">
+          <i class="bi bi-plus-circle me-1"></i>{% trans "Register Another Kiosk" %}
+        </a>
+      </li>
+    </ul>
+  {% endif %}
+
+  <!-- Stale Price Warning Banner -->
+  {% if stale_count > 0 %}
+    <div class="alert alert-warning border-warning shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="p-2 bg-warning text-dark rounded-circle">
+          <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        </div>
+        <div>
+          <h6 class="fw-bold mb-1 text-dark">
+            {% blocktrans count counter=stale_count %}
+              You have {{ counter }} listing marked as STALE (> {{ threshold_days }} days without confirmation)
+            {% plural %}
+              You have {{ counter }} listings marked as STALE (> {{ threshold_days }} days without confirmation)
+            {% endblocktrans %}
+          </h6>
+          <p class="small text-muted mb-0">
+            {% trans "Students see stale badges as unreliable. Click 'Confirm Today' on your listings below to refresh the verification badge to FRESH." %}
+          </p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <span class="text-muted small">{% trans "Total Inventory Items" %}</span>
+        <h3 class="fw-bold text-dark mb-0 mt-1">{{ total_listings }}</h3>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <span class="text-muted small">{% trans "Currently In Stock" %}</span>
+        <h3 class="fw-bold text-success mb-0 mt-1">{{ in_stock_count }}</h3>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <span class="text-muted small">{% trans "Requires Price Confirmation" %}</span>
+        <h3 class="fw-bold {% if stale_count > 0 %}text-danger{% else %}text-muted{% endif %} mb-0 mt-1">{{ stale_count }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Management Table -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="fw-bold text-dark mb-0">{% trans "Shop Inventory & Price Freshness Controls" %}</h4>
+      <a href="{% url 'market:shop_detail' active_shop.slug %}" class="btn btn-outline-dark btn-sm rounded-pill" target="_blank">
+        <i class="bi bi-box-arrow-up-right me-1"></i>{% trans "View Public Storefront" %}
+      </a>
+    </div>
+
+    {% if listings %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{% trans "Product" %}</th>
+              <th>{% trans "Price" %}</th>
+              <th>{% trans "Stock Status" %}</th>
+              <th>{% trans "Freshness" %}</th>
+              <th>{% trans "Quick Actions" %}</th>
+              <th class="text-end">{% trans "Edit" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for listing in listings %}
+              <tr>
+                <!-- Product -->
+                <td>
+                  <a href="{{ listing.product.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">
+                    {{ listing.product.localized_name }}
+                  </a>
+                  <span class="badge bg-light text-secondary small d-block mt-1" style="width: fit-content;">
+                    {{ listing.product.category.localized_name }}
+                  </span>
+                  {% if listing.stock_notes %}
+                    <small class="text-muted d-block mt-1">{{ listing.stock_notes }}</small>
+                  {% endif %}
+                </td>
+
+                <!-- Price -->
+                <td>
+                  <span class="fw-bold text-success fs-5">{{ listing.price }}</span> <span class="small text-muted">ETB</span>
+                </td>
+
+                <!-- Stock Toggle -->
+                <td>
+                  <form action="{% url 'market:listing_toggle_stock' listing.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    {% if listing.is_in_stock %}
+                      <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" title="{% trans 'Click to toggle out of stock' %}">
+                        <i class="bi bi-check-circle me-1"></i>{% trans "In Stock" %}
+                      </button>
+                    {% else %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="{% trans 'Click to toggle in stock' %}">
+                        <i class="bi bi-x-circle me-1"></i>{% trans "Out of Stock" %}
+                      </button>
+                    {% endif %}
+                  </form>
+                </td>
+
+                <!-- Freshness Badge -->
+                <td>
+                  {% if listing.freshness_status == 'FRESH' %}
+                    <span class="badge-fresh"><i class="bi bi-check-circle-fill"></i> {% trans "FRESH" %}</span>
+                  {% elif listing.freshness_status == 'EXPIRING' %}
+                    <span class="badge-expiring"><i class="bi bi-clock-history"></i> {% trans "EXPIRING" %}</span>
+                  {% else %}
+                    <span class="badge-stale"><i class="bi bi-exclamation-triangle-fill"></i> {% trans "STALE" %}</span>
+                  {% endif %}
+                  <div class="small text-muted mt-1" style="font-size: 0.72rem;">
+                    {{ listing.last_price_confirmed_at|date:"M d, Y" }}
+                  </div>
+                </td>
+
+                <!-- Confirm Price Today Action -->
+                <td>
+                  <form action="{% url 'market:listing_confirm_price' listing.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill" title="{% trans 'Confirm this price is accurate today' %}">
+                      <i class="bi bi-arrow-repeat me-1"></i>{% trans "Confirm Today" %}
+                    </button>
+                  </form>
+                </td>
+
+                <!-- Edit Listing -->
+                <td class="text-end">
+                  <a href="{% url 'market:listing_edit' listing.id %}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                    <i class="bi bi-pencil-square me-1"></i>{% trans "Edit Price" %}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-box-seam fs-1 mb-2 d-block"></i>
+        <h5 class="fw-bold text-dark mb-2">{% trans "Your inventory is currently empty" %}</h5>
+        <p class="small text-muted mb-3">
+          {% trans "Add your first product to start displaying your prices to Haramaya University students." %}
+        </p>
+        <a href="{% url 'market:listing_create' active_shop.slug %}" class="btn btn-success fw-bold rounded-pill px-4">
+          <i class="bi bi-plus-lg me-1"></i>{% trans "Add First Product Listing" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

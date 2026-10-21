@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div class="p-3 bg-success-subtle text-success rounded-circle">
+            <i class="bi bi-box-seam fs-2"></i>
+          </div>
+          <div>
+            <h3 class="fw-bold text-dark mb-0">{{ title }}</h3>
+            <p class="text-muted small mb-0">{% trans "Contribute a product to the campus-wide price comparison catalog" %}</p>
+          </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger py-2 small">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="{{ form.category.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.category.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.category }}
+              {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors }}</div>{% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.unit.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.unit.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.unit }}
+              {% if form.unit.errors %}<div class="text-danger small mt-1">{{ form.unit.errors }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.name.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="{{ form.name_om.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.name_om.label }}
+              </label>
+              {{ form.name_om }}
+              {% if form.name_om.errors %}<div class="text-danger small mt-1">{{ form.name_om.errors }}</div>{% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.name_am.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.name_am.label }}
+              </label>
+              {{ form.name_am }}
+              {% if form.name_am.errors %}<div class="text-danger small mt-1">{{ form.name_am.errors }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.brand_or_model.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.brand_or_model.label }}
+            </label>
+            {{ form.brand_or_model }}
+            <div class="form-text small">{{ form.brand_or_model.help_text }}</div>
+            {% if form.brand_or_model.errors %}<div class="text-danger small mt-1">{{ form.brand_or_model.errors }}</div>{% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.description.label }}
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label for="{{ form.image.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.image.label }}
+            </label>
+            {{ form.image }}
+            {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors }}</div>{% endif %}
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <a href="{% url 'market:product_list' %}" class="btn btn-outline-secondary rounded-pill px-4">
+              {% trans "Cancel" %}
+            </a>
+            <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
+              <i class="bi bi-plus-circle me-1"></i>{% trans "Add to Campus Catalog" %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Campus Gabaa (GabaaHU) - Campus Shopping & Price-Comparison Platform for Haramaya University & Bate Community">
+  <title>{% block title %}Campus Gabaa | Haramaya University Shopping & Price Comparison{% endblock %}</title>
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #14532d; border-bottom: 2px solid #f59e0b;">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'core:home' %}">
+        <i class="bi bi-shop text-warning"></i>
+        <span>Campus Gabaa</span>
+        <span class="brand-badge">HU</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <!-- Main Links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.app_name == 'market' and request.resolver_match.url_name == 'product_list' %}active font-weight-bold{% endif %}" href="{% url 'market:product_list' %}">
+              <i class="bi bi-grid-3x3-gap me-1"></i>{% trans "Compare Products" %}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.app_name == 'market' and request.resolver_match.url_name == 'shop_list' %}active font-weight-bold{% endif %}" href="{% url 'market:shop_list' %}">
+              <i class="bi bi-geo-alt me-1"></i>{% trans "Campus Shops" %}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'core:about' %}">
+              {% trans "About & Methodology" %}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'faq' %}active{% endif %}" href="{% url 'core:faq' %}">
+              {% trans "FAQ" %}
+            </a>
+          </li>
+        </ul>
+
+        <!-- Right Controls: Language Switcher & Auth -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <!-- Language Selector -->
+          <form id="campusLanguageForm" action="{% url 'set_language' %}" method="post" class="d-inline-flex m-0">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-success-subtle border-0 text-success-emphasis">
+                <i class="bi bi-translate"></i>
+              </span>
+              <select name="language" id="campusLanguageSelect" class="form-select form-select-sm border-0 bg-white" aria-label="{% trans 'Select Interface Language' %}" style="font-weight: 500;">
+                {% get_current_language as CURRENT_LANG %}
+                {% get_available_languages as LANGUAGES %}
+                {% get_language_info_list for LANGUAGES as languages %}
+                {% for lang in languages %}
+                  <option value="{{ lang.code }}" {% if lang.code == CURRENT_LANG %}selected{% endif %}>
+                    {{ lang.name_local }} ({{ lang.code }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
+
+          <!-- User Session Menu -->
+          {% if user.is_authenticated %}
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-light dropdown-toggle d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle"></i>
+                <span>{{ user.first_name|default:user.username }}</span>
+                {% if user.is_shop_owner %}
+                  <span class="badge bg-warning text-dark ms-1">{% trans "Vendor" %}</span>
+                {% elif user.is_moderator_user %}
+                  <span class="badge bg-danger ms-1">{% trans "Admin" %}</span>
+                {% endif %}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow">
+                <li><h6 class="dropdown-header">{% trans "Signed in as" %} {{ user.username }}</h6></li>
+                
+                {% if user.is_shop_owner %}
+                  <li><a class="dropdown-item" href="{% url 'market:shop_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>{% trans "Shop Dashboard" %}</a></li>
+                  <li><a class="dropdown-item" href="{% url 'market:product_create' %}"><i class="bi bi-plus-circle me-2"></i>{% trans "Suggest Product" %}</a></li>
+                {% endif %}
+
+                {% if user.is_moderator_user %}
+                  <li><a class="dropdown-item" href="{% url 'moderation:dashboard' %}"><i class="bi bi-shield-check me-2"></i>{% trans "Moderation Queue" %}</a></li>
+                  <li><a class="dropdown-item" href="/admin/" target="_blank"><i class="bi bi-gear me-2"></i>{% trans "Django Admin" %}</a></li>
+                {% endif %}
+
+                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>{% trans "Profile & Settings" %}</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form action="{% url 'accounts:logout' %}" method="post" class="d-inline w-100">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger">
+                      <i class="bi bi-box-arrow-right me-2"></i>{% trans "Sign Out" %}
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-light">{% trans "Sign In" %}</a>
+            <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-warning text-dark font-weight-bold">{% trans "Register" %}</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  {% if messages %}
+    <div class="container mt-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+          {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% endif %}
+          {% if message.tags == 'error' or message.tags == 'danger' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>{% endif %}
+          {% if message.tags == 'warning' %}<i class="bi bi-exclamation-circle-fill me-2"></i>{% endif %}
+          {% if message.tags == 'info' %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Main View Content -->
+  <main class="flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-4 mt-5">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
+            <i class="bi bi-shop text-warning fs-4"></i>
+            <span class="text-white fw-bold fs-5">Campus Gabaa (GabaaHU)</span>
+          </div>
+          <p class="small text-secondary mb-1">
+            {% trans "A transparent campus marketplace & price-comparison platform for Haramaya University students, faculty, and surrounding Bate merchants." %}
+          </p>
+          <p class="small text-secondary mb-0">
+            {% trans "Target Languages: Afaan Oromoo | አማርኛ | English" %} &bull; {% trans "Location: Haramaya, Ethiopia" %}
+          </p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-2 small">
+            <a href="{% url 'market:product_list' %}">{% trans "Catalog" %}</a>
+            <a href="{% url 'market:shop_list' %}">{% trans "Shops Directory" %}</a>
+            <a href="{% url 'core:about' %}">{% trans "Academic Capstone" %}</a>
+            <a href="{% url 'core:faq' %}">{% trans "FAQ & Pricing Rules" %}</a>
+            <a href="{% url 'core:health_check' %}" target="_blank">{% trans "System Health" %}</a>
+          </div>
+          <p class="small text-secondary mb-0">
+            &copy; 2026 Campus Gabaa. {% trans "Designed for Academic Graduation Capstone Defense." %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <!-- Custom JS -->
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

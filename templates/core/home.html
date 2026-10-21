@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Home" %} | Campus Gabaa - Haramaya University{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3 shadow-sm">
+          <i class="bi bi-geo-alt-fill me-1"></i>{% trans "Haramaya University & Bate Community Platform" %}
+        </span>
+        <h1 class="display-5 fw-bold mb-3">
+          {% trans "Compare Campus Prices & Discover Everyday Essentials" %}
+        </h1>
+        <p class="lead opacity-90 mb-4 px-md-4">
+          {% trans "Don't overpay or wander between kiosks. Discover stationery, electronics, toiletries, snacks, and print services across Main Campus and Bate with transparent freshness indicators." %}
+        </p>
+
+        <!-- Search Box -->
+        <form action="{% url 'market:product_list' %}" method="get" class="hero-search-box d-flex align-items-center mb-3">
+          <i class="bi bi-search text-muted fs-5 me-2"></i>
+          <input type="text" name="q" class="form-control" placeholder="{% trans 'Search exercise books, flash drives, soap, biscuits, printing...' %}" aria-label="Search products" required>
+          <button type="submit" class="btn btn-warning fw-bold px-4 rounded-pill">
+            {% trans "Compare" %}
+          </button>
+        </form>
+
+        <div class="d-flex justify-content-center gap-2 flex-wrap text-white-50 small">
+          <span>{% trans "Popular:" %}</span>
+          <a href="{% url 'market:product_list' %}?q=exercise" class="text-white text-decoration-underline">{% trans "Exercise Books" %}</a> &bull;
+          <a href="{% url 'market:product_list' %}?q=flash" class="text-white text-decoration-underline">{% trans "USB Flash Drives" %}</a> &bull;
+          <a href="{% url 'market:product_list' %}?q=soap" class="text-white text-decoration-underline">{% trans "Lifebuoy / Soap" %}</a> &bull;
+          <a href="{% url 'market:product_list' %}?q=print" class="text-white text-decoration-underline">{% trans "Printing Services" %}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Campus Stats Bar -->
+<div class="container my-n4 position-relative" style="margin-top: -1.75rem; z-index: 10;">
+  <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+    <div class="row text-center g-3">
+      <div class="col-md-4 border-end-md">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <div class="p-3 bg-success-subtle text-success rounded-circle">
+            <i class="bi bi-box-seam fs-3"></i>
+          </div>
+          <div class="text-start">
+            <h3 class="fw-bold mb-0 text-dark">{{ total_products|default:"0" }}</h3>
+            <span class="text-muted small">{% trans "Catalog Products" %}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 border-end-md">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-circle">
+            <i class="bi bi-shop fs-3"></i>
+          </div>
+          <div class="text-start">
+            <h3 class="fw-bold mb-0 text-dark">{{ total_shops|default:"0" }}</h3>
+            <span class="text-muted small">{% trans "Campus & Bate Shops" %}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <div class="p-3 bg-primary-subtle text-primary rounded-circle">
+            <i class="bi bi-arrow-repeat fs-3"></i>
+          </div>
+          <div class="text-start">
+            <h3 class="fw-bold mb-0 text-dark">{{ recent_price_updates|default:"0" }}</h3>
+            <span class="text-muted small">{% trans "Price Verifications This Week" %}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Freshness Indicators Feature Highlight -->
+<div class="container mt-5">
+  <div class="card border-0 shadow-sm rounded-4 bg-light p-4">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill fw-bold mb-2">
+          <i class="bi bi-shield-check me-1"></i>{% trans "Consumer Protection for Students" %}
+        </span>
+        <h3 class="fw-bold text-dark mb-3">
+          {% trans "Never Rely on Outdated Prices Again" %}
+        </h3>
+        <p class="text-secondary mb-3">
+          {% trans "Campus Gabaa eliminates guesswork. Every listing features an automated freshness timestamp so students know whether a price is current before walking across campus or taking a bajaj to town." %}
+        </p>
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-fresh"><i class="bi bi-check-circle-fill"></i> {% trans "FRESH" %}</span>
+            <span class="small text-muted">{% trans "Verified by shop owner within the last 3 days." %}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-expiring"><i class="bi bi-clock-history"></i> {% trans "EXPIRING" %}</span>
+            <span class="small text-muted">{% trans "Confirmed 3 to 7 days ago. Price may shift." %}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge-stale"><i class="bi bi-exclamation-triangle-fill"></i> {% trans "STALE" %}</span>
+            <span class="small text-muted">{% trans "Unconfirmed for over 7 days. Report if incorrect!" %}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="p-4 bg-white rounded-3 shadow-sm border border-light-subtle">
+          <h6 class="fw-bold mb-2 text-dark">
+            <i class="bi bi-people-fill text-primary me-2"></i>{% trans "Crowd-Sourced Accuracy Verification" %}
+          </h6>
+          <p class="small text-muted mb-3">
+            {% trans "If a kiosk owner charges more than listed or an item is out of stock, any student can submit an instant report. Our moderation queue contacts the merchant or updates the record." %}
+          </p>
+          <div class="p-3 bg-light rounded-2 border-start border-4 border-warning">
+            <p class="small fw-semibold text-dark mb-0">
+              <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+              {% trans "Built specifically for Haramaya University's decentralized kiosk layout across Main Campus, Agriculture Campus, and Bate Market." %}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Browse Categories -->
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <h3 class="fw-bold mb-1 text-dark">{% trans "Browse by Campus Need" %}</h3>
+      <p class="text-muted mb-0 small">{% trans "Filter products tailored to daily student life and study requirements" %}</p>
+    </div>
+    <a href="{% url 'market:product_list' %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
+      {% trans "View All Products" %} <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+
+  <div class="row g-3">
+    {% for cat in categories %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="{% url 'market:product_list' %}?category={{ cat.id }}" class="text-decoration-none">
+          <div class="card h-100 border-0 shadow-sm rounded-3 p-3 text-center bg-white transition hover-lift">
+            <div class="p-3 mx-auto mb-2 rounded-circle bg-success-subtle text-success d-inline-flex">
+              <i class="bi {{ cat.icon|default:'bi-tag' }} fs-3"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">{{ cat.localized_name }}</h6>
+            <span class="badge bg-light text-secondary rounded-pill small">{{ cat.product_count }} {% trans "items" %}</span>
+          </div>
+        </a>
+      </div>
+    {% empty %}
+      <div class="col-12 text-center py-4">
+        <p class="text-muted">{% trans "Categories are being configured." %}</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Featured / Popular Comparison Products -->
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <span class="badge bg-success-subtle text-success px-2 py-1 rounded small fw-bold mb-1">{% trans "Top Comparisons" %}</span>
+      <h3 class="fw-bold mb-1 text-dark">{% trans "Compare Across Multiple Shops" %}</h3>
+      <p class="text-muted mb-0 small">{% trans "Products with verified listings in 2 or more campus shops" %}</p>
+    </div>
+    <a href="{% url 'market:product_list' %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
+      {% trans "Full Catalog" %} <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+
+  <div class="row g-4">
+    {% for product in featured_products %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card card-product h-100 shadow-sm">
+          <div class="product-img-wrapper">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.localized_name }}">
+            {% else %}
+              <i class="bi bi-box text-muted opacity-50" style="font-size: 3.5rem;"></i>
+            {% endif %}
+          </div>
+          <div class="card-body p-3 d-flex flex-column">
+            <span class="badge bg-light text-secondary mb-2 align-self-start small">{{ product.category.localized_name }}</span>
+            <h6 class="card-title fw-bold text-dark mb-1" style="font-size: 0.95rem;">
+              <a href="{{ product.get_absolute_url }}" class="text-dark text-decoration-none">
+                {{ product.localized_name }}
+              </a>
+            </h6>
+            {% if product.brand_or_model %}
+              <span class="text-muted small mb-2">{{ product.brand_or_model }} &bull; {{ product.get_unit_display }}</span>
+            {% endif %}
+
+            <div class="mt-auto pt-2 border-top">
+              <div class="d-flex justify-content-between align-items-baseline mb-1">
+                <span class="text-muted small">{% trans "From" %}</span>
+                <span class="price-tag">{{ product.min_price }} <span class="price-currency">ETB</span></span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center small">
+                <span class="badge bg-primary-subtle text-primary">
+                  <i class="bi bi-shop me-1"></i>{{ product.listing_count }} {% trans "shops" %}
+                </span>
+                <a href="{{ product.get_absolute_url }}" class="text-success fw-bold text-decoration-none">
+                  {% trans "Compare" %} <i class="bi bi-chevron-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 text-center py-5">
+        <p class="text-muted">{% trans "Products will appear once shop listings are added." %}</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Call to Action for Campus Merchants -->
+<div class="container my-5">
+  <div class="card border-0 rounded-4 text-white p-4 p-md-5" style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%);">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <h3 class="fw-bold mb-2">{% trans "Are You a Campus Merchant or Kiosk Owner?" %}</h3>
+        <p class="lead mb-0 opacity-90" style="font-size: 1.05rem;">
+          {% trans "List your store on Campus Gabaa for free. Connect with thousands of Haramaya University students, increase your sales, and keep your prices transparent and verified." %}
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        {% if user.is_authenticated and user.is_shop_owner %}
+          <a href="{% url 'market:shop_dashboard' %}" class="btn btn-warning text-dark fw-bold btn-lg px-4 rounded-pill shadow">
+            <i class="bi bi-speedometer2 me-1"></i>{% trans "Manage My Shop" %}
+          </a>
+        {% else %}
+          <a href="{% url 'accounts:register' %}" class="btn btn-warning text-dark fw-bold btn-lg px-4 rounded-pill shadow">
+            <i class="bi bi-plus-circle me-1"></i>{% trans "Register Your Shop" %}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

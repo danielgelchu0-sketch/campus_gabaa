@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Account" %} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="text-center mb-4">
+          <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-circle d-inline-flex mb-2">
+            <i class="bi bi-person-plus-fill fs-2"></i>
+          </div>
+          <h3 class="fw-bold text-dark mb-1">{% trans "Join Campus Gabaa" %}</h3>
+          <p class="text-muted small">{% trans "Compare prices, track shop updates, or register a campus shop" %}</p>
+        </div>
+
+        <form method="post" action="{% url 'accounts:register' %}" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger py-2 small">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <!-- Role Selection with visual cards -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-dark small mb-2">{% trans "Choose Your Campus Role" %}</label>
+            <div class="row g-2">
+              {% for radio in form.role %}
+                <div class="col-6">
+                  <div class="border rounded-3 p-3 text-center h-100 bg-light-subtle">
+                    {{ radio.tag }}
+                    <label for="{{ radio.id_for_label }}" class="d-block mt-2 fw-semibold small cursor-pointer">
+                      {{ radio.choice_label }}
+                    </label>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.role.errors %}
+              <div class="text-danger small mt-1">{{ form.role.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.first_name.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}
+                <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.last_name.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}
+                <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.username.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.username }}
+            {% if form.username.errors %}
+              <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.email.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.phone_number.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.phone_number }}
+              <div class="form-text small">{{ form.phone_number.help_text }}</div>
+              {% if form.phone_number.errors %}
+                <div class="text-danger small mt-1">{{ form.phone_number.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="{{ form.campus_id_or_dorm.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.campus_id_or_dorm.label }}
+              </label>
+              {{ form.campus_id_or_dorm }}
+              {% if form.campus_id_or_dorm.errors %}
+                <div class="text-danger small mt-1">{{ form.campus_id_or_dorm.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.preferred_language.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.preferred_language.label }}
+              </label>
+              {{ form.preferred_language }}
+              {% if form.preferred_language.errors %}
+                <div class="text-danger small mt-1">{{ form.preferred_language.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {% trans "Password" %} <span class="text-danger">*</span>
+              </label>
+              {{ form.password1 }}
+              {% if form.password1.errors %}
+                <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {% trans "Confirm Password" %} <span class="text-danger">*</span>
+              </label>
+              {{ form.password2 }}
+              {% if form.password2.errors %}
+                <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success w-100 fw-bold py-2 rounded-3 shadow-sm mb-3">
+            <i class="bi bi-check2-circle me-1"></i>{% trans "Complete Registration" %}
+          </button>
+        </form>
+
+        <div class="text-center pt-3 border-top">
+          <p class="small text-muted mb-0">
+            {% trans "Already registered?" %}
+            <a href="{% url 'accounts:login' %}" class="text-success fw-bold text-decoration-none">{% trans "Sign In" %}</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

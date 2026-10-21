@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Moderation & Verification Dashboard" %} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <span class="badge bg-danger px-3 py-1 rounded-pill fw-bold mb-1">{% trans "Administrative Controls" %}</span>
+      <h2 class="fw-bold text-dark mb-0">{% trans "Campus Moderation Queue" %}</h2>
+      <p class="text-muted small mb-0">{% trans "Review user price discrepancy reports and approve campus merchant profiles" %}</p>
+    </div>
+    <a href="/admin/" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill">
+      <i class="bi bi-gear-fill me-1"></i>{% trans "Full Django Admin" %}
+    </a>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <span class="text-muted small">{% trans "Pending Price Reports" %}</span>
+        <h3 class="fw-bold text-danger mb-0 mt-1">{{ pending_reports_count }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <span class="text-muted small">{% trans "Shops Pending Verification" %}</span>
+        <h3 class="fw-bold text-warning-emphasis mb-0 mt-1">{{ pending_shops_count }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+        <span class="text-muted small">{% trans "Reports Resolved" %}</span>
+        <h3 class="fw-bold text-success mb-0 mt-1">{{ resolved_reports_count }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Shop Verifications (if any) -->
+  {% if pending_shops %}
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <h5 class="fw-bold text-dark mb-3">
+        <i class="bi bi-shop text-warning me-2"></i>{% trans "Shops Awaiting Physical Verification" %}
+      </h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{% trans "Shop Name" %}</th>
+              <th>{% trans "Zone & Landmark" %}</th>
+              <th>{% trans "Owner" %}</th>
+              <th>{% trans "Phone" %}</th>
+              <th class="text-end">{% trans "Decision" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for shop in pending_shops %}
+              <tr>
+                <td class="fw-bold text-dark">{{ shop.name }}</td>
+                <td>{{ shop.get_campus_zone_display }} &bull; <small class="text-muted">{{ shop.specific_location }}</small></td>
+                <td>{{ shop.owner.get_full_name|default:shop.owner.username }}</td>
+                <td><a href="tel:{{ shop.phone_number }}">{{ shop.phone_number }}</a></td>
+                <td class="text-end">
+                  <form action="{% url 'moderation:approve_shop' shop.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm rounded-pill px-3">
+                      <i class="bi bi-check-lg me-1"></i>{% trans "Approve" %}
+                    </button>
+                    <button type="submit" name="action" value="suspend" class="btn btn-outline-danger btn-sm rounded-pill">
+                      {% trans "Reject" %}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Price & Stock Reports Queue -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h5 class="fw-bold text-dark mb-0">{% trans "User-Submitted Listing Reports" %}</h5>
+      <div class="btn-group btn-group-sm" role="group">
+        <a href="?status=PENDING" class="btn {% if current_status == 'PENDING' %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+          {% trans "Pending" %}
+        </a>
+        <a href="?status=RESOLVED" class="btn {% if current_status == 'RESOLVED' %}btn-success{% else %}btn-outline-secondary{% endif %}">
+          {% trans "Resolved" %}
+        </a>
+        <a href="?status=DISMISSED" class="btn {% if current_status == 'DISMISSED' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+          {% trans "Dismissed" %}
+        </a>
+        <a href="?status=ALL" class="btn {% if current_status == 'ALL' %}btn-dark{% else %}btn-outline-secondary{% endif %}">
+          {% trans "All" %}
+        </a>
+      </div>
+    </div>
+
+    {% if reports %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>{% trans "Report Type" %}</th>
+              <th>{% trans "Product & Shop" %}</th>
+              <th>{% trans "Reported By" %}</th>
+              <th>{% trans "Observed Price" %}</th>
+              <th>{% trans "Status" %}</th>
+              <th>{% trans "Date" %}</th>
+              <th class="text-end">{% trans "Action" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for report in reports %}
+              <tr>
+                <td>#{{ report.id }}</td>
+                <td>
+                  <span class="badge bg-danger-subtle text-danger fw-semibold">{{ report.get_report_type_display }}</span>
+                </td>
+                <td>
+                  <a href="{{ report.listing.product.get_absolute_url }}" class="fw-bold text-dark text-decoration-none d-block">
+                    {{ report.listing.product.name }}
+                  </a>
+                  <small class="text-muted">{{ report.listing.shop.name }} (Listed: {{ report.listing.price }} ETB)</small>
+                </td>
+                <td>
+                  <span class="small text-secondary">{{ report.reported_by.username }}</span>
+                </td>
+                <td>
+                  {% if report.observed_price %}
+                    <span class="fw-bold text-danger">{{ report.observed_price }} ETB</span>
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if report.status == 'PENDING' %}
+                    <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                  {% elif report.status == 'RESOLVED' %}
+                    <span class="badge bg-success">{% trans "Resolved" %}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{% trans "Dismissed" %}</span>
+                  {% endif %}
+                </td>
+                <td class="small text-muted">{{ report.created_at|date:"M d, H:i" }}</td>
+                <td class="text-end">
+                  <a href="{% url 'moderation:report_detail' report.id %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    {% trans "Inspect" %} &rarr;
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-shield-check fs-1 mb-2 d-block text-success"></i>
+        <p class="mb-0">{% trans "No reports matching the selected status. The community marketplace is clean!" %}</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

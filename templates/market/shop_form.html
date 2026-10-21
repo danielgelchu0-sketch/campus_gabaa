@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div class="p-3 bg-success-subtle text-success rounded-circle">
+            <i class="bi bi-shop fs-2"></i>
+          </div>
+          <div>
+            <h3 class="fw-bold text-dark mb-0">{{ title }}</h3>
+            <p class="text-muted small mb-0">{% trans "Register or update your campus kiosk details" %}</p>
+          </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger py-2 small">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.name.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="{{ form.campus_zone.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.campus_zone.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.campus_zone }}
+              {% if form.campus_zone.errors %}<div class="text-danger small mt-1">{{ form.campus_zone.errors }}</div>{% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.opening_hours.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.opening_hours.label }}
+              </label>
+              {{ form.opening_hours }}
+              {% if form.opening_hours.errors %}<div class="text-danger small mt-1">{{ form.opening_hours.errors }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.specific_location.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.specific_location.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.specific_location }}
+            <div class="form-text small">{{ form.specific_location.help_text }}</div>
+            {% if form.specific_location.errors %}<div class="text-danger small mt-1">{{ form.specific_location.errors }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.phone_number.label }} <span class="text-danger">*</span>
+              </label>
+              {{ form.phone_number }}
+              {% if form.phone_number.errors %}<div class="text-danger small mt-1">{{ form.phone_number.errors }}</div>{% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="{{ form.alternative_phone.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                {{ form.alternative_phone.label }}
+              </label>
+              {{ form.alternative_phone }}
+              {% if form.alternative_phone.errors %}<div class="text-danger small mt-1">{{ form.alternative_phone.errors }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.description.label }}
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label for="{{ form.image.id_for_label }}" class="form-label fw-semibold small text-secondary">
+              {{ form.image.label }}
+            </label>
+            {{ form.image }}
+            {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors }}</div>{% endif %}
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <a href="{% url 'market:shop_dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4">
+              {% trans "Cancel" %}
+            </a>
+            <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
+              <i class="bi bi-check2-circle me-1"></i>{% trans "Save Shop Profile" %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

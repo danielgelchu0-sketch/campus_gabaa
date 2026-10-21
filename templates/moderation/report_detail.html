@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Inspect Report" %} #{{ report.id }} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-9 col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-wrap gap-2">
+          <div>
+            <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill fw-bold mb-1">
+              {{ report.get_report_type_display }}
+            </span>
+            <h3 class="fw-bold text-dark mb-0">{% trans "Price Discrepancy Report" %} #{{ report.id }}</h3>
+          </div>
+          <div>
+            <a href="{% url 'moderation:dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+              &larr; {% trans "Back to Queue" %}
+            </a>
+          </div>
+        </div>
+
+        <!-- Target Listing Snapshot -->
+        <div class="p-3 bg-light rounded-3 mb-4 border">
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">{% trans "Target Product" %}</span>
+              <a href="{{ report.listing.product.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">
+                {{ report.listing.product.name }}
+              </a>
+              <small class="text-muted d-block">{{ report.listing.product.category.name }}</small>
+            </div>
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">{% trans "Target Shop" %}</span>
+              <a href="{{ report.listing.shop.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">
+                {{ report.listing.shop.name }}
+              </a>
+              <small class="text-muted d-block">{{ report.listing.shop.get_campus_zone_display }} &bull; {{ report.listing.shop.phone_number }}</small>
+            </div>
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">{% trans "Listed Price on Platform" %}</span>
+              <span class="fw-bold text-success fs-5">{{ report.listing.price }} ETB</span>
+            </div>
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">{% trans "Price Observed by Student" %}</span>
+              {% if report.observed_price %}
+                <span class="fw-bold text-danger fs-5">{{ report.observed_price }} ETB</span>
+              {% else %}
+                <span class="text-muted">{% trans "Not specified" %}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Comment & Proof -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-dark mb-2">{% trans "Student Description & Feedback" %}</h6>
+          <div class="p-3 bg-white rounded border text-secondary">
+            {{ report.comment|linebreaks }}
+          </div>
+          <small class="text-muted mt-1 d-block">
+            {% trans "Submitted by" %} <strong>{{ report.reported_by.username }}</strong> {% trans "on" %} {{ report.created_at|date:"F d, Y at H:i" }}
+          </small>
+        </div>
+
+        {% if report.proof_image %}
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark mb-2">{% trans "Attached Photo Evidence / Receipt" %}</h6>
+            <a href="{{ report.proof_image.url }}" target="_blank">
+              <img src="{{ report.proof_image.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 250px;" alt="Report proof">
+            </a>
+          </div>
+        {% endif %}
+
+        <!-- Resolution Status -->
+        {% if report.status != 'PENDING' %}
+          <div class="alert alert-{% if report.status == 'RESOLVED' %}success{% else %}secondary{% endif %} p-3 rounded-3 mb-4">
+            <h6 class="fw-bold mb-1">
+              {% if report.status == 'RESOLVED' %}
+                <i class="bi bi-check-circle-fill me-1"></i>{% trans "Resolved by" %} {{ report.reviewed_by.username }}
+              {% else %}
+                <i class="bi bi-x-circle-fill me-1"></i>{% trans "Dismissed by" %} {{ report.reviewed_by.username }}
+              {% endif %}
+            </h6>
+            <p class="small mb-1"><strong>{% trans "Moderator Note:" %}</strong> {{ report.resolution_note|default:_("No note provided.") }}</p>
+            <small class="text-muted">{{ report.resolved_at|date:"F d, Y H:i" }}</small>
+          </div>
+        {% else %}
+          <!-- Resolution Form for Pending Reports -->
+          <div class="p-4 bg-light rounded-3 border">
+            <h5 class="fw-bold text-dark mb-3">{% trans "Take Moderation Action" %}</h5>
+            <form method="post" novalidate>
+              {% csrf_token %}
+              
+              <div class="mb-3">
+                <label for="{{ form.action.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                  {{ form.action.label }}
+                </label>
+                {{ form.action }}
+              </div>
+
+              <div class="mb-3">
+                <label for="{{ form.resolution_note.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                  {{ form.resolution_note.label }}
+                </label>
+                {{ form.resolution_note }}
+              </div>
+
+              <button type="submit" class="btn btn-success fw-bold rounded-pill px-4">
+                <i class="bi bi-shield-check me-1"></i>{% trans "Submit Moderation Decision" %}
+              </button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

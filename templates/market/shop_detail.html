@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ shop.name }} | {% trans "Campus Shop Profile" %} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Shop Storefront Header -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+    <div class="row align-items-center g-4">
+      <div class="col-md-8">
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+          <span class="badge-zone">{{ shop.get_campus_zone_display }}</span>
+          {% if shop.is_verified %}
+            <span class="badge bg-success-subtle text-success">
+              <i class="bi bi-patch-check-fill me-1"></i>{% trans "Physically Verified on Campus" %}
+            </span>
+          {% endif %}
+          {% if can_manage %}
+            <span class="badge bg-warning text-dark">{% trans "Your Shop" %}</span>
+          {% endif %}
+        </div>
+
+        <h2 class="fw-bold text-dark mb-1">{{ shop.name }}</h2>
+        <p class="text-secondary mb-2">
+          <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ shop.specific_location }}
+        </p>
+
+        {% if shop.description %}
+          <p class="text-muted small mb-3">{{ shop.description }}</p>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-3 align-items-center small text-secondary">
+          <span><i class="bi bi-clock-fill text-muted me-1"></i><strong>{% trans "Hours:" %}</strong> {{ shop.opening_hours }}</span>
+          <span><i class="bi bi-telephone-fill text-success me-1"></i><strong>{% trans "Phone:" %}</strong> <a href="tel:{{ shop.phone_number }}" class="text-dark">{{ shop.phone_number }}</a></span>
+          {% if shop.alternative_phone %}
+            <span><i class="bi bi-phone text-muted me-1"></i>{{ shop.alternative_phone }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        {% if can_manage %}
+          <div class="d-flex flex-column gap-2">
+            <a href="{% url 'market:shop_dashboard' %}" class="btn btn-warning text-dark fw-bold rounded-pill">
+              <i class="bi bi-speedometer2 me-1"></i>{% trans "Go to Shop Dashboard" %}
+            </a>
+            <a href="{% url 'market:shop_edit' shop.slug %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+              <i class="bi bi-pencil me-1"></i>{% trans "Edit Shop Info" %}
+            </a>
+            <a href="{% url 'market:listing_create' shop.slug %}" class="btn btn-success btn-sm rounded-pill fw-bold">
+              <i class="bi bi-plus-lg me-1"></i>{% trans "Add New Item" %}
+            </a>
+          </div>
+        {% else %}
+          <a href="tel:{{ shop.phone_number }}" class="btn btn-success fw-bold px-4 rounded-pill">
+            <i class="bi bi-telephone-fill me-1"></i>{% trans "Call Shopkeeper" %}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop Inventory -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h4 class="fw-bold text-dark mb-1">{% trans "Products & Pricing at this Shop" %}</h4>
+        <p class="text-muted small mb-0">{{ listings.count }} {% trans "items listed with live verification timestamps" %}</p>
+      </div>
+    </div>
+
+    {% if listings %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{% trans "Product" %}</th>
+              <th>{% trans "Category" %}</th>
+              <th>{% trans "Price (ETB)" %}</th>
+              <th>{% trans "Stock Status" %}</th>
+              <th>{% trans "Freshness" %}</th>
+              <th class="text-end">{% trans "Compare / Action" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for listing in listings %}
+              <tr>
+                <td>
+                  <a href="{{ listing.product.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">
+                    {{ listing.product.localized_name }}
+                  </a>
+                  {% if listing.stock_notes %}
+                    <span class="text-muted small d-block">{{ listing.stock_notes }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge bg-light text-secondary">{{ listing.product.category.localized_name }}</span>
+                </td>
+                <td class="fw-bold text-success fs-5">
+                  {{ listing.price }} <span class="fs-6 text-muted">ETB</span>
+                </td>
+                <td>
+                  {% if listing.is_in_stock %}
+                    <span class="badge bg-success-subtle text-success">{% trans "In Stock" %}</span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger">{% trans "Out of Stock" %}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if listing.freshness_status == 'FRESH' %}
+                    <span class="badge-fresh"><i class="bi bi-check-circle-fill"></i> {% trans "FRESH" %}</span>
+                  {% elif listing.freshness_status == 'EXPIRING' %}
+                    <span class="badge-expiring"><i class="bi bi-clock-history"></i> {% trans "EXPIRING" %}</span>
+                  {% else %}
+                    <span class="badge-stale"><i class="bi bi-exclamation-triangle-fill"></i> {% trans "STALE" %}</span>
+                  {% endif %}
+                  <div class="small text-muted" style="font-size: 0.72rem;">
+                    {{ listing.last_price_confirmed_at|date:"M d, Y" }}
+                  </div>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ listing.product.get_absolute_url }}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                      {% trans "Compare" %} <i class="bi bi-arrow-right"></i>
+                    </a>
+                    {% if can_manage %}
+                      <a href="{% url 'market:listing_edit' listing.id %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-box-seam fs-1 mb-2 d-block"></i>
+        <p>{% trans "No items are currently listed in this shop's inventory." %}</p>
+        {% if can_manage %}
+          <a href="{% url 'market:listing_create' shop.slug %}" class="btn btn-success btn-sm rounded-pill fw-bold">
+            <i class="bi bi-plus-lg me-1"></i>{% trans "Add First Product Listing" %}
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

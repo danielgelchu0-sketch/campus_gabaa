@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Frequently Asked Questions" %} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 900px;">
+  <div class="text-center mb-5">
+    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">{% trans "Help & Guidance" %}</span>
+    <h1 class="display-6 fw-bold text-dark">{% trans "Frequently Asked Questions" %}</h1>
+    <p class="text-secondary">{% trans "Everything you need to know about navigating prices, freshness badges, and shop verification at Haramaya University." %}</p>
+  </div>
+
+  <div class="accordion shadow-sm rounded-4 overflow-hidden border-0" id="campusFaqAccordion">
+    <!-- Q1 -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button fw-bold py-3 text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          <i class="bi bi-tag-fill text-success me-2"></i>{% trans "How does price comparison work on Campus Gabaa?" %}
+        </button>
+      </h2>
+      <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#campusFaqAccordion">
+        <div class="accordion-body text-secondary">
+          {% trans "Campus Gabaa organizes products into canonical catalog entries. Instead of seeing five different listings for the same '50-Sheet Exercise Book', you click into the product once and see a ranked table comparing every participating campus kiosk and Bate shop from cheapest to most expensive, along with stock availability and exact location." %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header" id="headingTwo">
+        <button class="accordion-button collapsed fw-bold py-3 text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          <i class="bi bi-stopwatch text-warning-emphasis me-2"></i>{% trans "What do the Freshness Badges (Fresh, Expiring, Stale) mean?" %}
+        </button>
+      </h2>
+      <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#campusFaqAccordion">
+        <div class="accordion-body text-secondary">
+          {% trans "To protect students from outdated prices in an inflationary market, every listing displays its verification age:" %}
+          <ul class="mt-2 mb-0">
+            <li><strong class="text-success">{% trans "FRESH (Green):" %}</strong> {% trans "Confirmed by the shopkeeper within the last 3 days. High confidence." %}</li>
+            <li><strong class="text-warning">{% trans "EXPIRING (Yellow):" %}</strong> {% trans "Last verified 3 to 7 days ago. Price is likely accurate but could have shifted." %}</li>
+            <li><strong class="text-danger">{% trans "STALE (Red):" %}</strong> {% trans "Unconfirmed for more than 7 days. We urge students to verify by phone or report discrepancies." %}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header" id="headingThree">
+        <button class="accordion-button collapsed fw-bold py-3 text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          <i class="bi bi-flag-fill text-danger me-2"></i>{% trans "What should I do if a kiosk charges more than the listed price?" %}
+        </button>
+      </h2>
+      <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#campusFaqAccordion">
+        <div class="accordion-body text-secondary">
+          {% trans "On any product comparison page, click the 'Report' button next to the shop. You can specify whether the price was higher, the item was out of stock, or the kiosk was closed. You can optionally include what you paid and attach a receipt photo. Our moderation team reviews these reports promptly." %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header" id="headingFour">
+        <button class="accordion-button collapsed fw-bold py-3 text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+          <i class="bi bi-shop text-primary me-2"></i>{% trans "How do I register a kiosk or shop as a vendor?" %}
+        </button>
+      </h2>
+      <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#campusFaqAccordion">
+        <div class="accordion-body text-secondary">
+          {% trans "Create an account and select 'Shop Owner / Vendor' as your account type. After registration, you will be prompted to enter your shop's name, campus zone (e.g. Main Campus Kiosk, Bate Gate, Bate Market), specific landmark, opening hours, and phone number. Once submitted, you can immediately start adding items to your inventory." %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header" id="headingFive">
+        <button class="accordion-button collapsed fw-bold py-3 text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+          <i class="bi bi-arrow-repeat text-success me-2"></i>{% trans "How do shop owners keep their prices fresh?" %}
+        </button>
+      </h2>
+      <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#campusFaqAccordion">
+        <div class="accordion-body text-secondary">
+          {% trans "Through the Vendor Dashboard, shop owners have access to a single-click 'Confirm Price Today' button for every item in their inventory. Clicking this refreshes the timestamp to today, logs the verification to the public audit trail, and turns the badge back to vibrant green FRESH without having to re-type the price." %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingSix">
+        <button class="accordion-button collapsed fw-bold py-3 text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+          <i class="bi bi-translate text-info me-2"></i>{% trans "Which languages are supported?" %}
+        </button>
+      </h2>
+      <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#campusFaqAccordion">
+        <div class="accordion-body text-secondary">
+          {% trans "Campus Gabaa natively supports English, Afaan Oromoo (the primary regional language of Oromia and Haramaya), and Amharic (አማርኛ). You can switch your preferred language at any time using the dropdown selector in the top navigation bar." %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-5">
+    <p class="text-muted small">{% trans "Still have questions or want to partner with Campus Gabaa?" %}</p>
+    <a href="mailto:support@campusgabaa.hu.edu.et" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+      <i class="bi bi-envelope me-1"></i>{% trans "Contact Campus Team" %}
+    </a>
+  </div>
+</div>
+{% endblock %}

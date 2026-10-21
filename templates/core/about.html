@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "About & Methodology" %} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Page Header -->
+  <div class="text-center mb-5">
+    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold mb-2">
+      {% trans "Academic Capstone Project & Technical Overview" %}
+    </span>
+    <h1 class="display-6 fw-bold text-dark mb-3">{% trans "Campus Gabaa: Problem, Architecture & Vision" %}</h1>
+    <p class="lead text-secondary mx-auto" style="max-width: 780px;">
+      {% trans "Solving information asymmetry and price fragmentation across Haramaya University and surrounding retail markets using open-source, zero-budget cloud engineering." %}
+    </p>
+  </div>
+
+  <div class="row g-5">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- 1. The Validated Problem -->
+      <section class="mb-5">
+        <h3 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-geo-alt-fill text-success me-2"></i>1. {% trans "The Real-World Campus Problem" %}
+        </h3>
+        <p>
+          {% trans "Haramaya University (HU) is one of Ethiopia's premier higher education institutions, hosting over 30,000 undergraduate and postgraduate students. However, the campus retail geography is intensely fragmented across distinct geographical clusters:" %}
+        </p>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="card h-100 border-0 bg-light p-3 rounded-3">
+              <h6 class="fw-bold text-success mb-1">{% trans "Main Campus Kiosks" %}</h6>
+              <p class="small text-muted mb-0">{% trans "Scattered near student dorm blocks (Blocks 1-60) and central administration. Highly convenient, but frequently apply heavy markups and experience rapid stockouts." %}</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card h-100 border-0 bg-light p-3 rounded-3">
+              <h6 class="fw-bold text-primary mb-1">{% trans "Bate Gate & Town Market" %}</h6>
+              <p class="small text-muted mb-0">{% trans "The bustling commercial street immediately outside HU campus gates. Offers competitive pricing on stationery, electronics, and groceries, but requires physical travel and price inquiry." %}</p>
+            </div>
+          </div>
+        </div>
+        <p>
+          {% trans "Prior to Campus Gabaa, students faced three major inefficiencies: (a) severe price variance for identical items (e.g. 100-page notebook varying from 85 to 130 ETB across 3 kiosks), (b) wasted physical walking time searching for items out of stock, and (c) inability to verify whether price quotes heard from peers are still current." %}
+        </p>
+      </section>
+
+      <!-- 2. The Solution & Core Value Proposition -->
+      <section class="mb-5">
+        <h3 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-lightbulb-fill text-warning me-2"></i>2. {% trans "The Campus Gabaa Solution" %}
+        </h3>
+        <p>
+          {% trans "Campus Gabaa (GabaaHU) is a decentralized campus shopping directory and price-comparison engine designed specifically for low-bandwidth mobile connections and multilingual Ethiopian communities." %}
+        </p>
+        <ul class="list-group list-group-flush mb-3 rounded-3 border">
+          <li class="list-group-item d-flex align-items-start gap-3 p-3">
+            <i class="bi bi-diagram-3-fill text-success fs-5 mt-1"></i>
+            <div>
+              <strong>{% trans "Canonical Product Catalog Decoupled from Shops" %}</strong>
+              <p class="text-muted small mb-0">{% trans "Instead of duplicate listings that clutter search results, a single product record (e.g., 'Deli 0.5mm Gel Pen') aggregates and ranks all competing shop offers by price." %}</p>
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-start gap-3 p-3">
+            <i class="bi bi-stopwatch-fill text-warning fs-5 mt-1"></i>
+            <div>
+              <strong>{% trans "Automated Stale-Price Indicators" %}</strong>
+              <p class="text-muted small mb-0">{% trans "In an inflationary economy, price freshness is essential. Listings track verification timestamps and are visually categorized as Fresh (< 3 days), Expiring (3-7 days), or Stale (> 7 days)." %}</p>
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-start gap-3 p-3">
+            <i class="bi bi-shield-lock-fill text-primary fs-5 mt-1"></i>
+            <div>
+              <strong>{% trans "Crowd-Sourced Accuracy Reporting & Moderation" %}</strong>
+              <p class="text-muted small mb-0">{% trans "Students report price discrepancies or closed shops directly from product pages, empowering campus moderators to keep the data trustworthy." %}</p>
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-start gap-3 p-3">
+            <i class="bi bi-translate text-danger fs-5 mt-1"></i>
+            <div>
+              <strong>{% trans "Trilingual Localization (Afaan Oromoo, Amharic, English)" %}</strong>
+              <p class="text-muted small mb-0">{% trans "Deep internationalization using GNU gettext, offering seamless native-language navigation for the East Hararghe region." %}</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 3. Technical Architecture -->
+      <section class="mb-5">
+        <h3 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bi bi-cpu-fill text-info me-2"></i>3. {% trans "System Architecture & Zero-Budget Engineering" %}
+        </h3>
+        <p>
+          {% trans "The application is built using a clean, maintainable Django monolithic architecture. To satisfy the strict academic zero-budget constraint, every component was selected for resilience, zero ongoing maintenance cost, and production reliability:" %}
+        </p>
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped small">
+            <thead class="table-light">
+              <tr>
+                <th>{% trans "Layer" %}</th>
+                <th>{% trans "Technology" %}</th>
+                <th>{% trans "Engineering Rationale" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-bold">{% trans "Backend Framework" %}</td>
+                <td>Python 3.14 & Django 5.2</td>
+                <td>{% trans "Batteries-included ORM, secure authentication, session management, CSRF protection, and internationalization." %}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">{% trans "Database" %}</td>
+                <td>PostgreSQL (Cloud) / SQLite (Dev)</td>
+                <td>{% trans "ACID compliant relational storage with dual-mode fallback via dj-database-url." %}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">{% trans "Static Assets" %}</td>
+                <td>WhiteNoise 6.8</td>
+                <td>{% trans "Serves compressed static CSS/JS directly from Gunicorn without needing an expensive dedicated CDN or reverse proxy." %}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">{% trans "Production Server" %}</td>
+                <td>Gunicorn 26.2 WSGI</td>
+                <td>{% trans "Standard UNIX pre-fork worker model for concurrency and instant container startup." %}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">{% trans "Frontend UX" %}</td>
+                <td>HTML5, Bootstrap 5.3, Vanilla JS</td>
+                <td>{% trans "Zero heavy JavaScript framework overhead; fast rendering on 3G Ethiopian mobile networks." %}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Sidebar / Presentation Snapshot -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white sticky-top" style="top: 85px;">
+        <h5 class="fw-bold text-dark mb-3">
+          <i class="bi bi-mortarboard-fill text-success me-2"></i>{% trans "Capstone Quick Facts" %}
+        </h5>
+        <ul class="list-unstyled small mb-4">
+          <li class="mb-2"><strong>{% trans "Institution:" %}</strong> Haramaya University</li>
+          <li class="mb-2"><strong>{% trans "Degree:" %}</strong> B.Sc. in Computer Science / Software Engineering</li>
+          <li class="mb-2"><strong>{% trans "Developer:" %}</strong> Solo Graduation Candidate</li>
+          <li class="mb-2"><strong>{% trans "Stack:" %}</strong> Django 5.2, Python 3.14, Bootstrap 5</li>
+          <li class="mb-2"><strong>{% trans "Infrastructure Cost:" %}</strong> $0.00 / Month (Zero-Budget)</li>
+          <li class="mb-2"><strong>{% trans "Deployment:" %}</strong> Public Cloud (Render / Koyeb)</li>
+          <li><strong>{% trans "Repository:" %}</strong> GitHub Open Source</li>
+        </ul>
+
+        <div class="p-3 bg-light rounded-3 border-start border-3 border-success mb-3">
+          <h6 class="fw-bold mb-1">{% trans "Commercial Potential" %}</h6>
+          <p class="small text-muted mb-0">
+            {% trans "In phase 2, the platform can monetize through sponsored vendor placements, verified seller badges, batch student delivery coordination, and targeted campus retail promotions." %}
+          </p>
+        </div>
+
+        <a href="{% url 'market:product_list' %}" class="btn btn-success w-100 fw-bold">
+          <i class="bi bi-search me-1"></i>{% trans "Explore Live Platform" %}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
