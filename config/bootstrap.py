@@ -48,6 +48,46 @@ def ensure_production_ready():
             sys.stdout.write("==> Cloud Bootstrapper: Demonstration data seeded successfully.\n")
             sys.stdout.flush()
 
+        # 4. Explicitly guarantee default admin and vendor accounts with active credentials
+        try:
+            from accounts.models import User
+            admin_user, _ = User.objects.get_or_create(
+                username='admin',
+                defaults={
+                    'email': 'admin@campusgabaa.hu.edu.et',
+                    'first_name': 'Dr. Dawit',
+                    'last_name': 'Tadesse',
+                    'role': User.ROLE_MODERATOR,
+                    'is_staff': True,
+                    'is_superuser': True,
+                }
+            )
+            admin_user.set_password('CampusAdmin2026!')
+            admin_user.is_staff = True
+            admin_user.is_superuser = True
+            admin_user.role = User.ROLE_MODERATOR
+            admin_user.save()
+
+            vendor_user, _ = User.objects.get_or_create(
+                username='aman_stationery',
+                defaults={
+                    'email': 'aman@kiosk.hu.edu.et',
+                    'first_name': 'Aman',
+                    'last_name': 'Kedir',
+                    'role': User.ROLE_SHOP_OWNER,
+                    'is_verified_vendor': True,
+                }
+            )
+            vendor_user.set_password('VendorPass2026!')
+            vendor_user.role = User.ROLE_SHOP_OWNER
+            vendor_user.is_verified_vendor = True
+            vendor_user.save()
+            sys.stdout.write("==> Cloud Bootstrapper: Verified admin and vendor login credentials.\n")
+            sys.stdout.flush()
+        except Exception as _user_err:
+            sys.stderr.write(f"==> Cloud Bootstrapper User Sync Note: {_user_err}\n")
+            sys.stderr.flush()
+
     except Exception as exc:
         sys.stderr.write(f"==> Cloud Bootstrapper Note: {exc}\n")
         sys.stderr.flush()

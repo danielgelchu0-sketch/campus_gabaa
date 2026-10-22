@@ -52,12 +52,21 @@ def register_view(request):
 def login_view(request):
     """
     User login view with validation and redirection.
+    Supports signing in with either username or email address.
     """
     if request.user.is_authenticated:
         return redirect('accounts:dashboard')
 
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        post_data = request.POST.copy()
+        user_input = post_data.get('username', '').strip()
+        # If user typed an email address, resolve it to their username
+        if '@' in user_input:
+            matched_user = User.objects.filter(email__iexact=user_input).first()
+            if matched_user:
+                post_data['username'] = matched_user.username
+
+        form = AuthenticationForm(request, data=post_data)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
