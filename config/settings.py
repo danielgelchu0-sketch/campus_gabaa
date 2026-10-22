@@ -189,6 +189,7 @@ STORAGES = {
     },
 }
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+WHITENOISE_MAX_AGE = 31536000  # Browser cache static assets for 1 year
 
 # Media files (User & Shop uploads)
 MEDIA_URL = '/media/'

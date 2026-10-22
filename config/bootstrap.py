@@ -31,10 +31,13 @@ def ensure_production_ready():
             sys.stdout.flush()
             call_command('collectstatic', interactive=False, verbosity=0)
 
-        # 2. Ensure database schema migrations are applied
-        sys.stdout.write("==> Cloud Bootstrapper: Ensuring database migrations are applied...\n")
-        sys.stdout.flush()
-        call_command('migrate', interactive=False, verbosity=0)
+        # 2. Fast check: Only run migrations if tables don't exist yet
+        from django.db import connection
+        existing_tables = connection.introspection.table_names()
+        if 'market_product' not in existing_tables:
+            sys.stdout.write("==> Cloud Bootstrapper: Applying initial database migrations...\n")
+            sys.stdout.flush()
+            call_command('migrate', interactive=False, verbosity=0)
 
         # 3. Seed demonstration data if product catalog is empty
         from market.models import Product

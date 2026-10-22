@@ -12,7 +12,7 @@ bind = f"0.0.0.0:{port}"
 
 # Concurrency tuning for free tier container memory limits
 workers = int(os.environ.get("WEB_CONCURRENCY", "1"))
-threads = 2
+threads = 4
 timeout = 120
 keepalive = 5
 
