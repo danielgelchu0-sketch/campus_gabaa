@@ -22,11 +22,21 @@ SECRET_KEY = os.getenv(
 
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
+# Allowed Hosts: Ensure .onrender.com, localhost, and 127.0.0.1 are always included
+_env_hosts = os.getenv('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,.onrender.com,.koyeb.app').split(',')
-    if h.strip()
+    '.onrender.com',
+    'localhost',
+    '127.0.0.1',
 ]
+if _env_hosts:
+    for host in _env_hosts.split(','):
+        h = host.strip()
+        if h and h not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(h)
+
+if '*' in ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['*']
 
 # CSRF trusted origins for modern Django versions (especially behind reverse proxies like Render/Koyeb)
 CSRF_TRUSTED_ORIGINS = [
@@ -162,12 +172,20 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
 # Whitenoise storage configuration
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files (User & Shop uploads)
