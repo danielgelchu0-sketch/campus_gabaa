@@ -1,157 +1,92 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Create Account" %} | Campus Gabaa{% endblock %}
+{% block title %}{% trans "Merchant & Kiosk Access" %} | Campus Gabaa{% endblock %}
 
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+    <div class="col-lg-8">
+      
+      <!-- Main Access Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
         <div class="text-center mb-4">
-          <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-circle d-inline-flex mb-2">
-            <i class="bi bi-person-plus-fill fs-2"></i>
+          <div class="p-3 bg-success-subtle text-success rounded-circle d-inline-flex mb-3">
+            <i class="bi bi-shield-check fs-1"></i>
           </div>
-          <h3 class="fw-bold text-dark mb-1">{% trans "Join Campus Gabaa" %}</h3>
-          <p class="text-muted small">{% trans "Compare prices, track shop updates, or register a campus shop" %}</p>
-        </div>
-
-        <form method="post" action="{% url 'accounts:register' %}" novalidate>
-          {% csrf_token %}
-
-          {% if form.non_field_errors %}
-            <div class="alert alert-danger py-2 small">
-              {{ form.non_field_errors }}
-            </div>
-          {% endif %}
-
-          <!-- Role Selection with visual cards -->
-          <div class="mb-4">
-            <label class="form-label fw-bold text-dark small mb-2">{% trans "Choose Your Campus Role" %}</label>
-            <div class="row g-2">
-              {% for radio in form.role %}
-                <div class="col-6">
-                  <div class="border rounded-3 p-3 text-center h-100 bg-light-subtle">
-                    {{ radio.tag }}
-                    <label for="{{ radio.id_for_label }}" class="d-block mt-2 fw-semibold small cursor-pointer">
-                      {{ radio.choice_label }}
-                    </label>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-            {% if form.role.errors %}
-              <div class="text-danger small mt-1">{{ form.role.errors }}</div>
-            {% endif %}
-          </div>
-
-          <div class="row g-3 mb-3">
-            <div class="col-sm-6">
-              <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {{ form.first_name.label }} <span class="text-danger">*</span>
-              </label>
-              {{ form.first_name }}
-              {% if form.first_name.errors %}
-                <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="col-sm-6">
-              <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {{ form.last_name.label }} <span class="text-danger">*</span>
-              </label>
-              {{ form.last_name }}
-              {% if form.last_name.errors %}
-                <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold small text-secondary">
-              {{ form.username.label }} <span class="text-danger">*</span>
-            </label>
-            {{ form.username }}
-            {% if form.username.errors %}
-              <div class="text-danger small mt-1">{{ form.username.errors }}</div>
-            {% endif %}
-          </div>
-
-          <div class="row g-3 mb-3">
-            <div class="col-sm-6">
-              <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {{ form.email.label }} <span class="text-danger">*</span>
-              </label>
-              {{ form.email }}
-              {% if form.email.errors %}
-                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="col-sm-6">
-              <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {{ form.phone_number.label }} <span class="text-danger">*</span>
-              </label>
-              {{ form.phone_number }}
-              <div class="form-text small">{{ form.phone_number.help_text }}</div>
-              {% if form.phone_number.errors %}
-                <div class="text-danger small mt-1">{{ form.phone_number.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="row g-3 mb-3">
-            <div class="col-sm-6">
-              <label for="{{ form.campus_id_or_dorm.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {{ form.campus_id_or_dorm.label }}
-              </label>
-              {{ form.campus_id_or_dorm }}
-              {% if form.campus_id_or_dorm.errors %}
-                <div class="text-danger small mt-1">{{ form.campus_id_or_dorm.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="col-sm-6">
-              <label for="{{ form.preferred_language.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {{ form.preferred_language.label }}
-              </label>
-              {{ form.preferred_language }}
-              {% if form.preferred_language.errors %}
-                <div class="text-danger small mt-1">{{ form.preferred_language.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="row g-3 mb-4">
-            <div class="col-sm-6">
-              <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {% trans "Password" %} <span class="text-danger">*</span>
-              </label>
-              {{ form.password1 }}
-              {% if form.password1.errors %}
-                <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="col-sm-6">
-              <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold small text-secondary">
-                {% trans "Confirm Password" %} <span class="text-danger">*</span>
-              </label>
-              {{ form.password2 }}
-              {% if form.password2.errors %}
-                <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-success w-100 fw-bold py-2 rounded-3 shadow-sm mb-3">
-            <i class="bi bi-check2-circle me-1"></i>{% trans "Complete Registration" %}
-          </button>
-        </form>
-
-        <div class="text-center pt-3 border-top">
-          <p class="small text-muted mb-0">
-            {% trans "Already registered?" %}
-            <a href="{% url 'accounts:login' %}" class="text-success fw-bold text-decoration-none">{% trans "Sign In" %}</a>
+          <h2 class="fw-bold text-dark mb-2">{% trans "Campus Kiosk & Vendor Access" %}</h2>
+          <p class="text-secondary mx-auto" style="max-width: 580px;">
+            {% trans "To protect Haramaya University students from fraudulent listings and inaccurate prices, public self-registration is closed. Every shop on Campus Gabaa is physically verified and provisioned directly by Campus Operations." %}
           </p>
         </div>
+
+        <div class="row g-4 mb-4">
+          <!-- Step 1: For Students -->
+          <div class="col-md-6">
+            <div class="card h-100 border-0 bg-light p-4 rounded-3">
+              <div class="d-flex align-items-center gap-2 mb-2 text-primary">
+                <i class="bi bi-mortarboard-fill fs-4"></i>
+                <h5 class="fw-bold mb-0">{% trans "For HU Students" %}</h5>
+              </div>
+              <p class="small text-muted mb-3">
+                {% trans "You do NOT need an account to use Campus Gabaa! You have 100% open, instant access to compare prices across dorm kiosks, admin print shops, and Bate Gate entrance." %}
+              </p>
+              <a href="{% url 'market:product_list' %}" class="btn btn-primary btn-sm fw-semibold rounded-pill mt-auto">
+                <i class="bi bi-search me-1"></i>{% trans "Browse Products Now" %}
+              </a>
+            </div>
+          </div>
+
+          <!-- Step 2: For Vendors -->
+          <div class="col-md-6">
+            <div class="card h-100 border-0 bg-light p-4 rounded-3">
+              <div class="d-flex align-items-center gap-2 mb-2 text-success">
+                <i class="bi bi-shop fs-4"></i>
+                <h5 class="fw-bold mb-0">{% trans "For Kiosk Owners" %}</h5>
+              </div>
+              <p class="small text-muted mb-3">
+                {% trans "Already have your kiosk credentials issued by campus management? Sign in to your dashboard to manage stock and confirm today's prices." %}
+              </p>
+              <a href="{% url 'accounts:login' %}" class="btn btn-success btn-sm fw-semibold rounded-pill mt-auto">
+                <i class="bi bi-box-arrow-in-right me-1"></i>{% trans "Vendor Sign In" %}
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- How to Onboard your Shop -->
+        <div class="border-top pt-4">
+          <h5 class="fw-bold text-dark mb-3">
+            <i class="bi bi-patch-question-fill text-warning me-2"></i>{% trans "Operate a Kiosk at HU or Bate Gate?" %}
+          </h5>
+          <p class="text-secondary small mb-3">
+            {% trans "If you run an active kiosk (Dorm Blocks 1–60, Central Admin / Library, or Bate Gateway) and want to list your items on Campus Gabaa, contact Campus Operations to verify your location and obtain login credentials:" %}
+          </p>
+
+          <div class="row g-3 small">
+            <div class="col-sm-4">
+              <div class="p-3 border rounded-3 bg-white">
+                <strong class="d-block text-dark"><i class="bi bi-telephone-fill text-success me-1"></i> {% trans "Phone Support" %}</strong>
+                <span class="text-muted">+251 91 100 0001</span>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-3 border rounded-3 bg-white">
+                <strong class="d-block text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {% trans "Campus Office" %}</strong>
+                <span class="text-muted">{% trans "Student Union Building, G-04" %}</span>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-3 border rounded-3 bg-white">
+                <strong class="d-block text-dark"><i class="bi bi-envelope-fill text-primary me-1"></i> {% trans "Email" %}</strong>
+                <span class="text-muted">ops@campusgabaa.hu.edu.et</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
+
     </div>
   </div>
 </div>

@@ -65,10 +65,10 @@ class MarketModelAndLogicTests(TestCase):
 
         self.shop2 = Shop.objects.create(
             owner=self.vendor2,
-            name='Bate Mart',
+            name='Bate Gateway Mart',
             slug='bate-mart',
-            campus_zone='BATE_MARKET',
-            specific_location='Bate Market Road',
+            campus_zone='BATE_GATE',
+            specific_location='Bate Gate Entrance',
             phone_number='0922334455',
             status=Shop.STATUS_APPROVED
         )

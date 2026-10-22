@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from .forms import ShopForm, ListingForm, ProductForm, SearchFilterForm
-from .models import Category, Product, Shop, Listing, PriceHistory
+from .models import Category, CampusZone, Product, Shop, Listing, PriceHistory
 
 
 def product_list(request):
@@ -171,9 +171,15 @@ def shop_list(request):
 
     shops = shops.order_by('-is_verified', 'name')
 
+    db_zones = list(CampusZone.objects.filter(is_active=True))
+    if db_zones:
+        campus_zones = [(z.code, z.localized_name) for z in db_zones]
+    else:
+        campus_zones = Shop.CAMPUS_ZONE_CHOICES
+
     context = {
         'shops': shops,
-        'campus_zones': Shop.CAMPUS_ZONE_CHOICES,
+        'campus_zones': campus_zones,
         'selected_zone': campus_zone,
         'query': q,
     }

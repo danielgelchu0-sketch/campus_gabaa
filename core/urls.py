@@ -9,7 +9,8 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('about/', views.about, name='about'),
+    path('how-to-use/', views.how_to_use, name='how_to_use'),
+    path('about/', views.how_to_use, name='about'),
     path('faq/', views.faq, name='faq'),
     path('healthz/', views.health_check, name='health_check'),
 ]

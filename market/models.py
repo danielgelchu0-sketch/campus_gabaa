@@ -176,15 +176,46 @@ class Product(models.Model):
         return count
 
 
+class CampusZone(models.Model):
+    """
+    Campus location zone within Haramaya University perimeter.
+    Allows administrators to add or edit zones directly from the admin panel.
+    """
+    code = models.CharField(max_length=50, unique=True, verbose_name=_('Zone Code (e.g. BATE_GATE)'))
+    name = models.CharField(max_length=120, verbose_name=_('Zone Name (English)'))
+    name_om = models.CharField(max_length=120, blank=True, verbose_name=_('Zone Name (Afaan Oromoo)'))
+    name_am = models.CharField(max_length=120, blank=True, verbose_name=_('Zone Name (Amharic)'))
+    description = models.TextField(blank=True, verbose_name=_('Description / Landmarks'))
+    order = models.PositiveIntegerField(default=0, verbose_name=_('Display Order'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Active'))
+
+    class Meta:
+        verbose_name = _('Campus Zone')
+        verbose_name_plural = _('Campus Zones')
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.localized_name
+
+    @property
+    def localized_name(self):
+        lang = get_language() or 'en'
+        if lang.startswith('om') and self.name_om:
+            return self.name_om
+        elif lang.startswith('am') and self.name_am:
+            return self.name_am
+        return self.name
+
+
 class Shop(models.Model):
     """
-    Physical shop, kiosk, bookstore, or service center in Haramaya & Bate.
+    Physical shop, kiosk, bookstore, or service center strictly within
+    Haramaya University campus perimeter and immediate Bate Gateway.
     """
     CAMPUS_ZONE_CHOICES = [
-        ('MAIN_CAMPUS_KIOSK', _('Haramaya Main Campus (Dorm / Admin Kiosks)')),
-        ('BATE_GATE', _('Bate Gate / Campus Entrance')),
-        ('BATE_MARKET', _('Bate Town Center & Market')),
-        ('HARAMAYA_TOWN', _('Haramaya Town Commercial Area')),
+        ('MAIN_CAMPUS_KIOSK', _('Haramaya Main Campus (Dorm Blocks 1–60)')),
+        ('CAMPUS_CENTRAL', _('Main Campus Central (Admin, Library & Cafeteria)')),
+        ('BATE_GATE', _('Bate Gate / Campus Entrance Kiosks')),
         ('AGRICULTURE_CAMPUS', _('Agriculture & Veterinary Campus Zone')),
     ]
 
@@ -262,6 +293,19 @@ class Shop(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_campus_zone_display()})"
+
+    def get_campus_zone_display(self):
+        """
+        Dynamically returns the localized zone name from database CampusZone
+        if present, otherwise falls back to static choice display.
+        """
+        try:
+            zone = CampusZone.objects.filter(code=self.campus_zone, is_active=True).first()
+            if zone:
+                return zone.localized_name
+        except Exception:
+            pass
+        return str(dict(self.CAMPUS_ZONE_CHOICES).get(self.campus_zone, self.campus_zone))
 
     def save(self, *args, **kwargs):
         if not self.slug:

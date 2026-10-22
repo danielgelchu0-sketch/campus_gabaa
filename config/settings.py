@@ -28,6 +28,7 @@ ALLOWED_HOSTS = [
     '.onrender.com',
     'localhost',
     '127.0.0.1',
+    'testserver',
 ]
 if _env_hosts:
     for host in _env_hosts.split(','):
@@ -66,6 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'core.middleware.SecurityHardeningMiddleware',  # Anti brute-force & probe defense
     'whitenoise.middleware.WhiteNoiseMiddleware',  # High-performance static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # Language selection and negotiation

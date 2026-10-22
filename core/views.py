@@ -54,12 +54,20 @@ def home(request):
     return render(request, 'core/home.html', context)
 
 
+def how_to_use(request):
+    """
+    Market-ready guide for students, buyers, and campus kiosk operators.
+    Provides visual instructions on searching, comparing prices, checking freshness,
+    and vendor onboarding within the Haramaya University perimeter.
+    """
+    return render(request, 'core/how_to_use.html')
+
+
 def about(request):
     """
-    Academic capstone context, project motivation at Haramaya University,
-    field methodology, and problem-solution architecture.
+    Redirects or renders the modern how-to-use guide.
     """
-    return render(request, 'core/about.html')
+    return render(request, 'core/how_to_use.html')
 
 
 def faq(request):

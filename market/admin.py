@@ -4,7 +4,15 @@ Django Admin registration for market app.
 
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from .models import Category, Product, Shop, Listing, PriceHistory
+from .models import Category, CampusZone, Product, Shop, Listing, PriceHistory
+
+
+@admin.register(CampusZone)
+class CampusZoneAdmin(admin.ModelAdmin):
+    list_display = ('name', 'name_om', 'name_am', 'code', 'order', 'is_active')
+    list_editable = ('order', 'is_active')
+    search_fields = ('name', 'name_om', 'name_am', 'code')
+    ordering = ('order', 'name')
 
 
 @admin.register(Category)

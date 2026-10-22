@@ -8,7 +8,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from accounts.models import User
-from market.models import Category, Product, Shop, Listing, PriceHistory
+from market.models import Category, CampusZone, Product, Shop, Listing, PriceHistory
 from moderation.models import PriceReport
 
 
@@ -159,6 +159,49 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f'Configured {len(cats)} campus categories.'))
 
+        # 2b. Campus Zones
+        zones_data = [
+            {
+                'code': 'MAIN_CAMPUS_KIOSK',
+                'name': 'Haramaya Main Campus (Dorm Blocks 1–60)',
+                'name_om': 'Mooraa Guddaa HU (Kiyooskii Ciisaa 1–60)',
+                'name_am': 'ሀረማያ ዋና ግቢ (ዶርም 1–60 ኪዮስኮች)',
+                'description': 'Student residential dorm kiosks (Blocks 1–60), post office row, and campus perimeter shops.',
+                'order': 1,
+            },
+            {
+                'code': 'CAMPUS_CENTRAL',
+                'name': 'Main Campus Central (Admin, Library & Cafeteria)',
+                'name_om': 'Wiirtuu Mooraa (Bulchiinsa, Mana Kitaabaa fi Kaafteeriyaa)',
+                'name_am': 'ዋና ግቢ ማዕከል (አስተዳደር፣ ቤተ-መጽሐፍት እና ካፌ)',
+                'description': 'Central campus services, student union building, main library print centers, and central cafeteria area.',
+                'order': 2,
+            },
+            {
+                'code': 'BATE_GATE',
+                'name': 'Bate Gate (Campus Entrance Shops & Services)',
+                'name_om': 'Balbala Baatee (Dukaanota Seensa Mooraa)',
+                'name_am': 'ባቴ በር (የግቢው መግቢያ ሱቆች እና አገልግሎቶች)',
+                'description': 'Commercial kiosks, mobile accessory shops, and copy centers directly at Haramaya University Main Gate.',
+                'order': 3,
+            },
+            {
+                'code': 'AGRICULTURE_CAMPUS',
+                'name': 'Agriculture & Veterinary Campus Zone',
+                'name_om': 'Mooraa Qonnaa fi Fayyaa Beeyladaa',
+                'name_am': 'ግብርና እና የእንስሳት ሕክምና ግቢ',
+                'description': 'College of Agriculture and Veterinary Medicine campus area kiosks and student stationery shops.',
+                'order': 4,
+            },
+        ]
+
+        for zdata in zones_data:
+            CampusZone.objects.update_or_create(
+                code=zdata['code'],
+                defaults=zdata
+            )
+        self.stdout.write(self.style.SUCCESS(f'Configured {len(zones_data)} verified campus zones.'))
+
         # 3. Shops
         shops_data = [
             {
@@ -177,11 +220,11 @@ class Command(BaseCommand):
                 'name': 'Bate High-Tech Mobile & Accessories',
                 'slug': 'bate-high-tech-mobile',
                 'owner': gemechu_owner,
-                'campus_zone': 'BATE_MARKET',
-                'specific_location': 'Bate Town Center, 150m from Total Fuel Station',
+                'campus_zone': 'BATE_GATE',
+                'specific_location': 'Bate Gate Entrance, East Row Kiosk #2',
                 'phone_number': '0922334455',
                 'opening_hours': '8:00 AM - 8:00 PM',
-                'description': 'Direct importer of phone chargers, memory cards, flash drives, earphones, and laptop cables.',
+                'description': 'Direct retailer of phone chargers, memory cards, flash drives, earphones, and laptop cables.',
                 'status': Shop.STATUS_APPROVED,
                 'is_verified': True,
             },
@@ -201,7 +244,7 @@ class Command(BaseCommand):
                 'name': 'Central Library Digital Print & Copy Service',
                 'slug': 'central-library-print-service',
                 'owner': aman_owner,
-                'campus_zone': 'MAIN_CAMPUS_KIOSK',
+                'campus_zone': 'CAMPUS_CENTRAL',
                 'specific_location': 'HU Central Library Ground Floor, North Wing',
                 'phone_number': '0944556677',
                 'opening_hours': '8:00 AM - 8:30 PM',
@@ -213,8 +256,8 @@ class Command(BaseCommand):
                 'name': 'Finfinne Bookshop & Stationery',
                 'slug': 'finfinne-bookshop-bate',
                 'owner': gemechu_owner,
-                'campus_zone': 'BATE_MARKET',
-                'specific_location': 'Near Bate Commercial Bank of Ethiopia branch',
+                'campus_zone': 'BATE_GATE',
+                'specific_location': 'Bate Gate Entrance, West Row Kiosk #5',
                 'phone_number': '0955667788',
                 'opening_hours': '8:30 AM - 7:30 PM',
                 'description': 'Academic textbooks, engineering drawing supplies, scientific calculators, and notebooks.',

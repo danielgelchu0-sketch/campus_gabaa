@@ -7,7 +7,7 @@ Product catalog requests, and advanced search/filtering.
 from decimal import Decimal
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Shop, Listing, Product, Category
+from .models import Shop, Listing, Product, Category, CampusZone
 
 
 class ShopForm(forms.ModelForm):
@@ -39,10 +39,21 @@ class ShopForm(forms.ModelForm):
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': _('Describe what your shop sells, services offered, etc.')
+                'placeholder': _('Describe what your shop sells, services offered, discounts for HU students...')
             }),
             'image': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            zones = list(CampusZone.objects.filter(is_active=True))
+            if zones:
+                self.fields['campus_zone'].choices = [(z.code, z.localized_name) for z in zones]
+            else:
+                self.fields['campus_zone'].choices = list(Shop.CAMPUS_ZONE_CHOICES)
+        except Exception:
+            pass
 
 
 class ListingForm(forms.ModelForm):
@@ -166,3 +177,16 @@ class SearchFilterForm(forms.Form):
         initial='price_asc',
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            zones = list(CampusZone.objects.filter(is_active=True))
+            if zones:
+                self.fields['campus_zone'].choices = [('', _('All Campus Zones'))] + [
+                    (z.code, z.localized_name) for z in zones
+                ]
+            else:
+                self.fields['campus_zone'].choices = [('', _('All Campus Zones'))] + list(Shop.CAMPUS_ZONE_CHOICES)
+        except Exception:
+            self.fields['campus_zone'].choices = [('', _('All Campus Zones'))] + list(Shop.CAMPUS_ZONE_CHOICES)

@@ -31,10 +31,10 @@ class CoreViewsTests(TestCase):
         self.assertContains(response, 'Electronics')
 
     def test_about_and_faq_pages(self):
-        """Verify about page and FAQ render."""
-        resp_about = self.client.get(reverse('core:about'))
+        """Verify how-to-use / about page and FAQ render."""
+        resp_about = self.client.get(reverse('core:how_to_use'))
         self.assertEqual(resp_about.status_code, 200)
-        self.assertContains(resp_about, 'Academic Capstone')
+        self.assertContains(resp_about, 'How to Use')
 
         resp_faq = self.client.get(reverse('core:faq'))
         self.assertEqual(resp_faq.status_code, 200)

@@ -44,8 +44,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'core:about' %}">
-              {% trans "About & Methodology" %}
+            <a class="nav-link {% if request.resolver_match.url_name == 'how_to_use' or request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'core:how_to_use' %}">
+              <i class="bi bi-lightbulb me-1"></i>{% trans "How to Use" %}
             </a>
           </li>
           <li class="nav-item">
@@ -100,7 +100,7 @@
 
                 {% if user.is_moderator_user %}
                   <li><a class="dropdown-item" href="{% url 'moderation:dashboard' %}"><i class="bi bi-shield-check me-2"></i>{% trans "Moderation Queue" %}</a></li>
-                  <li><a class="dropdown-item" href="/admin/" target="_blank"><i class="bi bi-gear me-2"></i>{% trans "Django Admin" %}</a></li>
+                  <li><a class="dropdown-item" href="{% url 'admin:index' %}" target="_blank"><i class="bi bi-gear me-2"></i>{% trans "Control Desk Admin" %}</a></li>
                 {% endif %}
 
                 <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>{% trans "Profile & Settings" %}</a></li>
@@ -116,8 +116,7 @@
               </ul>
             </div>
           {% else %}
-            <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-light">{% trans "Sign In" %}</a>
-            <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-warning text-dark font-weight-bold">{% trans "Register" %}</a>
+            <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-in-right me-1"></i>{% trans "Vendor Sign In" %}</a>
           {% endif %}
         </div>
       </div>
@@ -165,12 +164,13 @@
           <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-2 small">
             <a href="{% url 'market:product_list' %}">{% trans "Catalog" %}</a>
             <a href="{% url 'market:shop_list' %}">{% trans "Shops Directory" %}</a>
-            <a href="{% url 'core:about' %}">{% trans "Academic Capstone" %}</a>
+            <a href="{% url 'core:how_to_use' %}">{% trans "How to Use" %}</a>
             <a href="{% url 'core:faq' %}">{% trans "FAQ & Pricing Rules" %}</a>
+            <a href="{% url 'accounts:register' %}">{% trans "Kiosk Onboarding" %}</a>
             <a href="{% url 'core:health_check' %}" target="_blank">{% trans "System Health" %}</a>
           </div>
           <p class="small text-secondary mb-0">
-            &copy; 2026 Campus Gabaa. {% trans "Designed for Academic Graduation Capstone Defense." %}
+            &copy; 2026 Campus Gabaa (GabaaHU). {% trans "Connecting Haramaya University Students with Verified Campus & Bate Gate Kiosks." %}
           </p>
         </div>
       </div>

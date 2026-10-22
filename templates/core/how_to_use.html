@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "How to Use Campus Gabaa" %} | Campus Gabaa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Page Header -->
+  <div class="text-center mb-5">
+    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold mb-2">
+      <i class="bi bi-lightbulb-fill me-1"></i>{% trans "Student & Kiosk Guide" %}
+    </span>
+    <h1 class="display-6 fw-bold text-dark mb-3">{% trans "How to Use Campus Gabaa (GabaaHU)" %}</h1>
+    <p class="lead text-secondary mx-auto" style="max-width: 720px;">
+      {% trans "Find the cheapest stationery, snacks, printing, and electronics across Haramaya University dorm blocks and Bate Gateway kiosks in seconds." %}
+    </p>
+  </div>
+
+  <!-- Role Tabs -->
+  <ul class="nav nav-pills justify-content-center mb-5 gap-2" id="guideTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active px-4 py-2 rounded-pill fw-bold" id="students-tab" data-bs-toggle="pill" data-bs-target="#students-guide" type="button" role="tab">
+        <i class="bi bi-mortarboard-fill me-2"></i>{% trans "For Students & Buyers" %}
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link px-4 py-2 rounded-pill fw-bold" id="vendors-tab" data-bs-toggle="pill" data-bs-target="#vendors-guide" type="button" role="tab">
+        <i class="bi bi-shop me-2"></i>{% trans "For Campus Kiosk Owners" %}
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="guideTabContent">
+    
+    <!-- 1. STUDENT GUIDE -->
+    <div class="tab-pane fade show active" id="students-guide" role="tabpanel">
+      <div class="row g-4 mb-5">
+        
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+            <div class="p-3 bg-success-subtle text-success rounded-circle d-inline-flex mx-auto mb-3">
+              <i class="bi bi-search fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">1. {% trans "Search Any Item" %}</h5>
+            <p class="small text-secondary mb-0">
+              {% trans "Type an item (e.g. exercise book, Bic pen, phone charger) or choose a campus category from the catalog." %}
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+            <div class="p-3 bg-primary-subtle text-primary rounded-circle d-inline-flex mx-auto mb-3">
+              <i class="bi bi-tags-fill fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">2. {% trans "Compare Kiosk Prices" %}</h5>
+            <p class="small text-secondary mb-0">
+              {% trans "View side-by-side prices across different dorm kiosks and Bate Gate shops. Cheaper shops are ranked first with potential Birr savings shown." %}
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+            <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-circle d-inline-flex mx-auto mb-3">
+              <i class="bi bi-shield-check fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">3. {% trans "Check Price Freshness" %}</h5>
+            <p class="small text-secondary mb-0">
+              {% trans "Green badge means confirmed this week. Yellow means price is older. Avoid outdated prices before walking across campus!" %}
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+            <div class="p-3 bg-info-subtle text-info-emphasis rounded-circle d-inline-flex mx-auto mb-3">
+              <i class="bi bi-geo-alt-fill fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">4. {% trans "Walk In or Call" %}</h5>
+            <p class="small text-secondary mb-0">
+              {% trans "Get the exact kiosk location (e.g. Opposite Dorm Block 42) and call the vendor directly to hold your item." %}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Freshness Indicators Explainer -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5">
+        <h4 class="fw-bold text-dark mb-3">
+          <i class="bi bi-clock-history text-success me-2"></i>{% trans "Understanding Price Freshness Badges" %}
+        </h4>
+        <p class="text-secondary small mb-4">
+          {% trans "In an active university environment with changing market prices, price verification timestamps ensure you never get surprised at the kiosk counter:" %}
+        </p>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="border rounded-3 p-3 bg-success-subtle border-success-subtle h-100">
+              <span class="badge bg-success mb-2">{% trans "FRESH (< 3 Days)" %}</span>
+              <p class="small text-dark mb-0">
+                {% trans "Confirmed by the vendor today or very recently. Highly trustworthy price and stock availability." %}
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="border rounded-3 p-3 bg-warning-subtle border-warning-subtle h-100">
+              <span class="badge bg-warning text-dark mb-2">{% trans "EXPIRING (3–7 Days)" %}</span>
+              <p class="small text-dark mb-0">
+                {% trans "Listing was updated within the last week. Usually accurate, but price may shift slightly if new stock arrived." %}
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="border rounded-3 p-3 bg-danger-subtle border-danger-subtle h-100">
+              <span class="badge bg-danger mb-2">{% trans "STALE (> 7 Days)" %}</span>
+              <p class="small text-dark mb-0">
+                {% trans "Unconfirmed for over a week. We recommend calling the shop or checking fresh listings first." %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. VENDOR GUIDE -->
+    <div class="tab-pane fade" id="vendors-guide" role="tabpanel">
+      <div class="row g-4 mb-5">
+        
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+            <div class="p-3 bg-success-subtle text-success rounded-circle d-inline-flex mx-auto mb-3">
+              <i class="bi bi-card-checklist fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">1. {% trans "Get Vetted & Onboarded" %}</h5>
+            <p class="small text-secondary mb-0">
+              {% trans "Contact Campus Operations to register your shop. We verify your physical location (Dorm block or Bate Gate) and issue secure login credentials." %}
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+            <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-circle d-inline-flex mx-auto mb-3">
+              <i class="bi bi-arrow-repeat fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">2. {% trans "1-Click Daily Confirmation" %}</h5>
+            <p class="small text-secondary mb-0">
+              {% trans "Click 'Confirm Price Today' from your mobile phone. Your items instantly turn green (Fresh) and get boosted to the top of student searches." %}
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+            <div class="p-3 bg-primary-subtle text-primary rounded-circle d-inline-flex mx-auto mb-3">
+              <i class="bi bi-graph-up-arrow fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">3. {% trans "Grow Student Foot Traffic" %}</h5>
+            <p class="small text-secondary mb-0">
+              {% trans "Thousands of HU students checking daily prices will discover your kiosk, call your phone directly, and walk straight to your shop." %}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="text-center">
+        <a href="{% url 'accounts:login' %}" class="btn btn-success px-5 py-3 fw-bold rounded-pill shadow-sm">
+          <i class="bi bi-box-arrow-in-right me-2"></i>{% trans "Access Vendor Dashboard" %}
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Campus Perimeter Boundaries Notice -->
+  <div class="card border-0 bg-light rounded-4 p-4 mt-4 text-center">
+    <div class="d-flex align-items-center justify-content-center gap-2 mb-2 text-secondary">
+      <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
+      <h6 class="fw-bold mb-0 text-dark">{% trans "Campus Coverage Perimeter" %}</h6>
+    </div>
+    <p class="small text-secondary mx-auto mb-0" style="max-width: 680px;">
+      {% trans "Campus Gabaa strictly covers verified retail kiosks within Haramaya University Main Campus (Blocks 1–60, Admin & Central Library), the Agriculture & Veterinary Campus, and the immediate Bate Gateway entrance shops." %}
+    </p>
+  </div>
+</div>
+{% endblock %}
