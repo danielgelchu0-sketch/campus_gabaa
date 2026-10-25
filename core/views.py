@@ -4,8 +4,10 @@ Homepage, about, FAQ, health check endpoint for cloud monitoring.
 """
 
 from datetime import timedelta
+import os
+from django.conf import settings
 from django.db.models import Count, Min, Max, Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 from market.models import Product, Shop, Listing, Category, PriceHistory
@@ -97,3 +99,34 @@ def health_check(request):
         return JsonResponse(status_data, status=503)
 
     return JsonResponse(status_data, status=200)
+
+
+def service_worker(request):
+    """
+    Serves the root-scoped service worker for PWA offline caching & standalone installability.
+    """
+    sw_path = os.path.join(settings.BASE_DIR, 'static', 'js', 'sw.js')
+    try:
+        with open(sw_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        response = HttpResponse(content, content_type='application/javascript')
+        response['Service-Worker-Allowed'] = '/'
+        response['Cache-Control'] = 'no-cache, must-revalidate'
+        return response
+    except FileNotFoundError:
+        return HttpResponse("// SW not found", content_type='application/javascript', status=404)
+
+
+def manifest(request):
+    """
+    Serves the PWA Web App Manifest at root domain with the standard MIME type.
+    """
+    manifest_path = os.path.join(settings.BASE_DIR, 'static', 'manifest.json')
+    try:
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        response = HttpResponse(content, content_type='application/manifest+json')
+        response['Cache-Control'] = 'public, max-age=3600'
+        return response
+    except FileNotFoundError:
+        return HttpResponse("{}", content_type='application/manifest+json', status=404)
