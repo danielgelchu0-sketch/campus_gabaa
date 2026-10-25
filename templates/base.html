@@ -19,6 +19,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Campus Gabaa">
+  <script>
+    window.pwaDeferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.pwaDeferredPrompt = e;
+      window.dispatchEvent(new CustomEvent('pwa-ready'));
+    });
+  </script>
 
   <!-- Open Graph / Facebook / Telegram / WhatsApp -->
   <meta property="og:site_name" content="Campus Gabaa">

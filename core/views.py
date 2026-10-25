@@ -106,6 +106,9 @@ def service_worker(request):
     Serves the root-scoped service worker for PWA offline caching & standalone installability.
     """
     sw_path = os.path.join(settings.BASE_DIR, 'static', 'js', 'sw.js')
+    if not os.path.exists(sw_path) and hasattr(settings, 'STATIC_ROOT') and settings.STATIC_ROOT:
+        sw_path = os.path.join(settings.STATIC_ROOT, 'js', 'sw.js')
+
     try:
         with open(sw_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -122,6 +125,9 @@ def manifest(request):
     Serves the PWA Web App Manifest at root domain with the standard MIME type.
     """
     manifest_path = os.path.join(settings.BASE_DIR, 'static', 'manifest.json')
+    if not os.path.exists(manifest_path) and hasattr(settings, 'STATIC_ROOT') and settings.STATIC_ROOT:
+        manifest_path = os.path.join(settings.STATIC_ROOT, 'manifest.json')
+
     try:
         with open(manifest_path, 'r', encoding='utf-8') as f:
             content = f.read()

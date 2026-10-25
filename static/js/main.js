@@ -39,21 +39,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // 4. Register PWA Service Worker for standalone APK-style mode
+  // 4. Register PWA Service Worker immediately for standalone APK-style mode
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
+    const registerSW = function () {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then(function (registration) {
-          // Service worker active
+          // Service worker successfully registered
         })
         .catch(function (err) {
           console.warn('PWA ServiceWorker registration error:', err);
         });
-    });
+    };
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      registerSW();
+    } else {
+      window.addEventListener('load', registerSW);
+    }
   }
 
   // 5. In-App Standalone Mode & PWA Install Prompt Controller (Permanent until installed)
-  let deferredPrompt = null;
   const pwaInstallBanner = document.getElementById('pwaInstallBanner');
   const pwaInstallBtn = document.getElementById('pwaInstallBtn');
   const pwaDismissBtn = document.getElementById('pwaDismissBtn');
@@ -64,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const pwaDirectTriggerBtn = document.getElementById('pwaDirectTriggerBtn');
   const pwaPromptReadySection = document.getElementById('pwaPromptReadySection');
   const pwaManualGuideSection = document.getElementById('pwaManualGuideSection');
+  const pwaInstallModalEl = document.getElementById('pwaInstallModal');
 
   // Check if app is installed (standalone mode or previous install recorded)
   const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
@@ -92,48 +98,123 @@ document.addEventListener('DOMContentLoaded', function () {
       if (pwaFloatingFab) pwaFloatingFab.classList.add('d-none');
     }
 
-    // Intercept native browser prompt whenever Chrome triggers it
-    window.addEventListener('beforeinstallprompt', function (e) {
-      e.preventDefault();
-      deferredPrompt = e;
-
-      // Enable direct trigger in guide modal
-      if (pwaPromptReadySection && pwaManualGuideSection) {
+    // Synchronize prompt ready section if prompt was captured early
+    function checkPromptReady() {
+      if (window.pwaDeferredPrompt && pwaPromptReadySection && pwaManualGuideSection) {
         pwaPromptReadySection.classList.remove('d-none');
         pwaManualGuideSection.classList.add('d-none');
       }
+    }
+
+    checkPromptReady();
+    window.addEventListener('pwa-ready', checkPromptReady);
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.pwaDeferredPrompt = e;
+      checkPromptReady();
     });
 
-    // Unified installer trigger
-    function triggerInstall() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function (choiceResult) {
+    // Helper to open the modal reliably with bootstrap or pure JS fallback
+    function showInstallModal() {
+      if (!pwaInstallModalEl) return;
+      try {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const modal = bootstrap.Modal.getOrCreateInstance(pwaInstallModalEl);
+          modal.show();
+          return;
+        }
+      } catch (err) {
+        console.warn('Bootstrap modal error, using fallback:', err);
+      }
+
+      // Pure JS fallback
+      pwaInstallModalEl.classList.add('show');
+      pwaInstallModalEl.style.display = 'block';
+      pwaInstallModalEl.removeAttribute('aria-hidden');
+      document.body.classList.add('modal-open');
+
+      // Backdrop
+      let backdrop = document.getElementById('pwaModalBackdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'pwaModalBackdrop';
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+      }
+    }
+
+    function closeInstallModal() {
+      if (!pwaInstallModalEl) return;
+      try {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const modal = bootstrap.Modal.getInstance(pwaInstallModalEl);
+          if (modal) {
+            modal.hide();
+            return;
+          }
+        }
+      } catch (e) {}
+
+      pwaInstallModalEl.classList.remove('show');
+      pwaInstallModalEl.style.display = 'none';
+      pwaInstallModalEl.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      const backdrop = document.getElementById('pwaModalBackdrop');
+      if (backdrop) backdrop.remove();
+    }
+
+    // Modal dismiss listener fallback
+    if (pwaInstallModalEl) {
+      pwaInstallModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (btn) {
+        btn.addEventListener('click', closeInstallModal);
+      });
+    }
+
+    // Unified interactive installer trigger
+    function triggerInstall(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      // Visual tap response feedback
+      const targetBtn = (e && e.currentTarget) || pwaInstallBtn;
+      if (targetBtn) {
+        targetBtn.classList.add('opacity-75');
+        setTimeout(function () {
+          targetBtn.classList.remove('opacity-75');
+        }, 300);
+      }
+
+      const activePrompt = window.pwaDeferredPrompt;
+      if (activePrompt) {
+        closeInstallModal();
+        activePrompt.prompt();
+        activePrompt.userChoice.then(function (choiceResult) {
           if (choiceResult.outcome === 'accepted') {
             localStorage.setItem('pwa_installed', 'true');
             hideAllInstallElements();
           }
-          deferredPrompt = null;
+          window.pwaDeferredPrompt = null;
         });
       } else {
-        // Show universal guided installation modal
-        const modalEl = document.getElementById('pwaInstallModal');
-        if (modalEl) {
-          const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-          modal.show();
-        }
+        // Show universal interactive modal
+        showInstallModal();
       }
     }
 
-    // Attach click listeners to all permanent install buttons
-    if (pwaInstallBtn) pwaInstallBtn.addEventListener('click', triggerInstall);
-    if (pwaNavInstallBtn) pwaNavInstallBtn.addEventListener('click', triggerInstall);
-    if (pwaFabBtn) pwaFabBtn.addEventListener('click', triggerInstall);
-    if (pwaDirectTriggerBtn) pwaDirectTriggerBtn.addEventListener('click', triggerInstall);
+    // Attach click and touch listeners to all permanent install buttons
+    [pwaInstallBtn, pwaNavInstallBtn, pwaFabBtn, pwaDirectTriggerBtn].forEach(function (btn) {
+      if (btn) {
+        btn.addEventListener('click', triggerInstall);
+      }
+    });
 
     // Minimize bottom banner into floating pill button
     if (pwaDismissBtn) {
-      pwaDismissBtn.addEventListener('click', function () {
+      pwaDismissBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         if (pwaInstallBanner) pwaInstallBanner.classList.add('d-none');
         if (pwaFloatingFab) pwaFloatingFab.classList.remove('d-none');
         sessionStorage.setItem('pwa_banner_minimized', '1');
@@ -145,6 +226,6 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('appinstalled', function () {
     localStorage.setItem('pwa_installed', 'true');
     hideAllInstallElements();
-    deferredPrompt = null;
+    window.pwaDeferredPrompt = null;
   });
 });

@@ -340,4 +340,21 @@ footer a:hover {
     padding-bottom: 0 !important;
   }
 }
+
+/* Responsive tactile feedback for PWA install buttons */
+#pwaInstallBtn,
+#pwaNavInstallBtn,
+#pwaFabBtn,
+#pwaDirectTriggerBtn {
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+#pwaInstallBtn:active,
+#pwaNavInstallBtn:active,
+#pwaFabBtn:active,
+#pwaDirectTriggerBtn:active {
+  transform: scale(0.95);
+  opacity: 0.85;
 }
