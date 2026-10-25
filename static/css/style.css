@@ -294,3 +294,50 @@ footer a:hover {
 .smaller {
   font-size: 0.75rem;
 }
+
+/* Floating Action Pill (when banner minimized) */
+.pwa-floating-fab {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 1045;
+  animation: fadeInFab 0.25s ease-in-out;
+}
+
+.pwa-floating-fab button {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pwa-floating-fab button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeInFab {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Give room at bottom of body on mobile when install banner is present */
+@media (max-width: 768px) {
+  body:not(.pwa-standalone) {
+    padding-bottom: 62px;
+  }
+}
+
+/* Native CSS hiding in installed standalone mode */
+@media (display-mode: standalone) {
+  .pwa-install-element,
+  .pwa-install-banner,
+  .pwa-floating-fab,
+  #pwaInstallBanner,
+  #pwaNavInstallItem,
+  #pwaFloatingFab {
+    display: none !important;
+  }
+  body {
+    padding-bottom: 0 !important;
+  }
+}
+}

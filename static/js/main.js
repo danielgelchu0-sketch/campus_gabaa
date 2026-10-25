@@ -52,88 +52,99 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 5. In-App Standalone Mode & PWA Install Prompt Controller
+  // 5. In-App Standalone Mode & PWA Install Prompt Controller (Permanent until installed)
   let deferredPrompt = null;
   const pwaInstallBanner = document.getElementById('pwaInstallBanner');
   const pwaInstallBtn = document.getElementById('pwaInstallBtn');
   const pwaDismissBtn = document.getElementById('pwaDismissBtn');
   const pwaNavInstallItem = document.getElementById('pwaNavInstallItem');
   const pwaNavInstallBtn = document.getElementById('pwaNavInstallBtn');
+  const pwaFloatingFab = document.getElementById('pwaFloatingFab');
+  const pwaFabBtn = document.getElementById('pwaFabBtn');
+  const pwaDirectTriggerBtn = document.getElementById('pwaDirectTriggerBtn');
+  const pwaPromptReadySection = document.getElementById('pwaPromptReadySection');
+  const pwaManualGuideSection = document.getElementById('pwaManualGuideSection');
 
-  // Check if app is already running in standalone mode (installed)
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                       window.navigator.standalone === true;
+  // Check if app is installed (standalone mode or previous install recorded)
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                      window.navigator.standalone === true ||
+                      localStorage.getItem('pwa_installed') === 'true';
 
-  if (!isStandalone) {
-    // Intercept native browser install prompt (Chrome Android, Edge, Desktop Chrome)
+  function hideAllInstallElements() {
+    document.body.classList.add('pwa-standalone');
+    document.querySelectorAll('.pwa-install-element').forEach(function (el) {
+      el.classList.add('d-none');
+    });
+  }
+
+  if (isInstalled) {
+    hideAllInstallElements();
+  } else {
+    // App is NOT installed -> Ensure persistent controls across all navigation and activities
+
+    // Check banner minimization state
+    const isMinimized = sessionStorage.getItem('pwa_banner_minimized') === '1';
+    if (isMinimized && pwaInstallBanner && pwaFloatingFab) {
+      pwaInstallBanner.classList.add('d-none');
+      pwaFloatingFab.classList.remove('d-none');
+    } else if (pwaInstallBanner) {
+      pwaInstallBanner.classList.remove('d-none');
+      if (pwaFloatingFab) pwaFloatingFab.classList.add('d-none');
+    }
+
+    // Intercept native browser prompt whenever Chrome triggers it
     window.addEventListener('beforeinstallprompt', function (e) {
       e.preventDefault();
       deferredPrompt = e;
 
-      // Show banner if not dismissed in current session
-      if (pwaInstallBanner && !sessionStorage.getItem('pwa_banner_dismissed')) {
-        pwaInstallBanner.classList.remove('d-none');
-      }
-
-      // Show navbar install button
-      if (pwaNavInstallItem) {
-        pwaNavInstallItem.classList.remove('d-none');
+      // Enable direct trigger in guide modal
+      if (pwaPromptReadySection && pwaManualGuideSection) {
+        pwaPromptReadySection.classList.remove('d-none');
+        pwaManualGuideSection.classList.add('d-none');
       }
     });
 
-    // Handler to execute native install prompt
+    // Unified installer trigger
     function triggerInstall() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(function (choiceResult) {
           if (choiceResult.outcome === 'accepted') {
-            if (pwaInstallBanner) pwaInstallBanner.classList.add('d-none');
-            if (pwaNavInstallItem) pwaNavInstallItem.classList.add('d-none');
+            localStorage.setItem('pwa_installed', 'true');
+            hideAllInstallElements();
           }
           deferredPrompt = null;
         });
       } else {
-        // Fallback for iOS Safari or browsers without beforeinstallprompt
-        const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        if (isIos) {
-          const iosModalEl = document.getElementById('pwaIosModal');
-          if (iosModalEl) {
-            const modal = new bootstrap.Modal(iosModalEl);
-            modal.show();
-          }
-        } else {
-          alert('To install Campus Gabaa: Tap the browser menu (⋮) in the top-right corner and select "Install app" or "Add to Home screen".');
+        // Show universal guided installation modal
+        const modalEl = document.getElementById('pwaInstallModal');
+        if (modalEl) {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+          modal.show();
         }
       }
     }
 
-    if (pwaInstallBtn) {
-      pwaInstallBtn.addEventListener('click', triggerInstall);
-    }
-    if (pwaNavInstallBtn) {
-      pwaNavInstallBtn.addEventListener('click', triggerInstall);
-    }
+    // Attach click listeners to all permanent install buttons
+    if (pwaInstallBtn) pwaInstallBtn.addEventListener('click', triggerInstall);
+    if (pwaNavInstallBtn) pwaNavInstallBtn.addEventListener('click', triggerInstall);
+    if (pwaFabBtn) pwaFabBtn.addEventListener('click', triggerInstall);
+    if (pwaDirectTriggerBtn) pwaDirectTriggerBtn.addEventListener('click', triggerInstall);
 
+    // Minimize bottom banner into floating pill button
     if (pwaDismissBtn) {
       pwaDismissBtn.addEventListener('click', function () {
-        if (pwaInstallBanner) {
-          pwaInstallBanner.classList.add('d-none');
-        }
-        sessionStorage.setItem('pwa_banner_dismissed', '1');
+        if (pwaInstallBanner) pwaInstallBanner.classList.add('d-none');
+        if (pwaFloatingFab) pwaFloatingFab.classList.remove('d-none');
+        sessionStorage.setItem('pwa_banner_minimized', '1');
       });
-    }
-
-    // Always reveal navbar install button on mobile iOS as well
-    const isIosMobile = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (isIosMobile && pwaNavInstallItem) {
-      pwaNavInstallItem.classList.remove('d-none');
     }
   }
 
-  // Hide install controls once app is installed and launched
+  // Once installation succeeds, permanently hide all install triggers
   window.addEventListener('appinstalled', function () {
-    if (pwaInstallBanner) pwaInstallBanner.classList.add('d-none');
-    if (pwaNavInstallItem) pwaNavInstallItem.classList.add('d-none');
+    localStorage.setItem('pwa_installed', 'true');
+    hideAllInstallElements();
     deferredPrompt = null;
   });
 });

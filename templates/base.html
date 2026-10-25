@@ -81,9 +81,10 @@
               {% trans "FAQ" %}
             </a>
           </li>
-          <li class="nav-item d-none" id="pwaNavInstallItem">
-            <button id="pwaNavInstallBtn" type="button" class="btn btn-warning btn-sm fw-bold rounded-pill px-3 my-1 ms-lg-2 shadow-sm text-dark">
-              <i class="bi bi-download me-1"></i>{% trans "Install App" %}
+          <li class="nav-item pwa-install-element" id="pwaNavInstallItem">
+            <button id="pwaNavInstallBtn" type="button" class="btn btn-warning btn-sm fw-bold rounded-pill px-3 my-1 ms-lg-2 shadow-sm text-dark d-flex align-items-center gap-1">
+              <i class="bi bi-phone-fill text-dark"></i>
+              <span>{% trans "Install App" %}</span>
             </button>
           </li>
         </ul>
@@ -211,48 +212,93 @@
     </div>
   </footer>
 
-  <!-- Mobile Floating PWA Install Banner -->
-  <aside id="pwaInstallBanner" class="pwa-install-banner shadow-lg d-none" aria-label="{% trans 'Install Campus Gabaa Application' %}">
+  <!-- Mobile Floating PWA Install Banner (Permanent until installed) -->
+  <aside id="pwaInstallBanner" class="pwa-install-banner shadow-lg pwa-install-element" aria-label="{% trans 'Install Campus Gabaa Application' %}">
     <div class="container d-flex align-items-center justify-content-between gap-3 py-2 px-3">
       <div class="d-flex align-items-center gap-3">
         <img src="{% static 'img/logo-icon.svg' %}" alt="Campus Gabaa" class="pwa-banner-icon">
         <div>
           <div class="fw-bold text-dark small mb-0">{% trans "Install Campus Gabaa" %}</div>
-          <div class="text-muted smaller">{% trans "Use like a native Android app with faster loading" %}</div>
+          <div class="text-muted smaller">{% trans "Use standalone APK-style mode without browser bars" %}</div>
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
         <button id="pwaInstallBtn" type="button" class="btn btn-warning btn-sm fw-bold rounded-pill px-3 shadow-sm text-dark">
           <i class="bi bi-download me-1"></i>{% trans "Install" %}
         </button>
-        <button id="pwaDismissBtn" type="button" class="btn-close btn-sm" aria-label="{% trans 'Close' %}"></button>
+        <button id="pwaDismissBtn" type="button" class="btn-close btn-sm" aria-label="{% trans 'Minimize' %}" title="{% trans 'Minimize' %}"></button>
       </div>
     </div>
   </aside>
 
-  <!-- iOS PWA Instructions Modal -->
-  <div class="modal fade" id="pwaIosModal" tabindex="-1" aria-labelledby="pwaIosModalLabel" aria-hidden="true">
+  <!-- Floating Compact Install Pill (shows if banner is minimized) -->
+  <div id="pwaFloatingFab" class="pwa-floating-fab shadow-lg pwa-install-element d-none">
+    <button id="pwaFabBtn" type="button" class="btn btn-warning btn-sm fw-bold rounded-pill shadow-sm text-dark d-flex align-items-center gap-2 py-2 px-3">
+      <img src="{% static 'img/logo-icon.svg' %}" width="20" height="20" alt="App">
+      <span>{% trans "Install App" %}</span>
+    </button>
+  </div>
+
+  <!-- PWA Install Guide Modal -->
+  <div class="modal fade" id="pwaInstallModal" tabindex="-1" aria-labelledby="pwaInstallModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
+      <div class="modal-content border-0 shadow-lg rounded-4">
         <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold" id="pwaIosModalLabel">
-            <i class="bi bi-phone text-success me-2"></i>{% trans "Add to Home Screen" %}
-          </h5>
+          <div class="d-flex align-items-center gap-2">
+            <img src="{% static 'img/logo-icon.svg' %}" alt="Campus Gabaa" width="32" height="32" class="rounded-2">
+            <h5 class="modal-title fw-bold" id="pwaInstallModalLabel">{% trans "Install Campus Gabaa" %}</h5>
+          </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body text-center py-4">
-          <img src="{% static 'img/icon-192.png' %}" alt="Campus Gabaa" class="rounded-4 mb-3 shadow-sm" width="72" height="72">
-          <h6 class="fw-bold">{% trans "Install Campus Gabaa on iPhone / iPad" %}</h6>
-          <p class="text-muted small mb-4">
-            {% trans "Run Campus Gabaa full-screen with fast loading across Haramaya campus." %}
-          </p>
-          <div class="text-start bg-light rounded-3 p-3 small">
-            <div class="mb-2"><strong>1.</strong> {% trans "Tap the Safari Share button" %} <i class="bi bi-box-arrow-up text-primary fs-6 mx-1"></i> {% trans "at the bottom of your screen." %}</div>
-            <div><strong>2.</strong> {% trans "Scroll down and tap" %} <strong>"{% trans 'Add to Home Screen' %}"</strong> <i class="bi bi-plus-square text-success mx-1"></i>.</div>
+        <div class="modal-body py-4">
+          <div class="text-center mb-3">
+            <img src="{% static 'img/icon-192.png' %}" alt="Campus Gabaa" class="rounded-4 shadow-sm mb-2" width="76" height="76">
+            <h6 class="fw-bold mb-1">{% trans "Campus Gabaa (GabaaHU)" %}</h6>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small">
+              <i class="bi bi-phone me-1"></i>{% trans "Standalone Android APK Mode" %}
+            </span>
+          </div>
+
+          <div id="pwaPromptReadySection" class="d-none text-center mb-3">
+            <p class="text-muted small mb-3">
+              {% trans "Tap the button below to prompt your browser to add Campus Gabaa directly to your home screen:" %}
+            </p>
+            <button id="pwaDirectTriggerBtn" type="button" class="btn btn-warning btn-lg fw-bold rounded-pill px-4 shadow w-100 text-dark">
+              <i class="bi bi-download me-2"></i>{% trans "Install Now" %}
+            </button>
+          </div>
+
+          <div id="pwaManualGuideSection">
+            <p class="text-muted small mb-2 text-center">
+              {% trans "Follow these quick steps to install on your mobile device:" %}
+            </p>
+            <div class="bg-light rounded-3 p-3 small border mb-3">
+              <div class="fw-bold text-success mb-2"><i class="bi bi-android2 me-1"></i>Android (Chrome / Brave / Edge):</div>
+              <div class="d-flex align-items-start gap-2 mb-2">
+                <span class="badge bg-warning text-dark rounded-circle px-2 py-1">1</span>
+                <div>{% trans "Tap the three dots menu" %} <strong class="fs-6">( ⋮ )</strong> {% trans "in the top-right corner of Chrome." %}</div>
+              </div>
+              <div class="d-flex align-items-start gap-2">
+                <span class="badge bg-warning text-dark rounded-circle px-2 py-1">2</span>
+                <div>{% trans "Tap" %} <strong class="text-success">{% trans "'Install app'" %}</strong> {% trans "or" %} <strong>"{% trans 'Add to Home screen' %}"</strong>.</div>
+              </div>
+            </div>
+
+            <div class="bg-light rounded-3 p-3 small border">
+              <div class="fw-bold text-primary mb-2"><i class="bi bi-apple me-1"></i>iPhone / iPad (Safari):</div>
+              <div class="d-flex align-items-start gap-2 mb-2">
+                <span class="badge bg-warning text-dark rounded-circle px-2 py-1">1</span>
+                <div>{% trans "Tap the Safari Share button" %} <i class="bi bi-box-arrow-up text-primary mx-1"></i> {% trans "at the bottom." %}</div>
+              </div>
+              <div class="d-flex align-items-start gap-2">
+                <span class="badge bg-warning text-dark rounded-circle px-2 py-1">2</span>
+                <div>{% trans "Scroll down and select" %} <strong>"{% trans 'Add to Home Screen' %}"</strong> <i class="bi bi-plus-square text-success mx-1"></i>.</div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer border-0 pt-0">
-          <button type="button" class="btn btn-secondary w-100 rounded-pill" data-bs-dismiss="modal">{% trans "Got it" %}</button>
+          <button type="button" class="btn btn-outline-secondary w-100 rounded-pill" data-bs-dismiss="modal">{% trans "Close" %}</button>
         </div>
       </div>
     </div>
