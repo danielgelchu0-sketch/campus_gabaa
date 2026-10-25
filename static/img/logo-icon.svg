@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="cgGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="50%" stop-color="#14532d"/>
+      <stop offset="100%" stop-color="#0a371e"/>
+    </linearGradient>
+    <linearGradient id="cgGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="40%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="cgShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-opacity="0.35" flood-color="#000000"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base for High Contrast on any background -->
+  <rect x="5" y="5" width="110" height="110" rx="26" fill="url(#cgGreenGrad)" stroke="url(#cgGoldGrad)" stroke-width="4"/>
+
+  <!-- Shopping Bag Handles -->
+  <path d="M46 44 V31 C46 23.5 74 23.5 74 31 V44" 
+        fill="none" stroke="url(#cgGoldGrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#cgShadow)"/>
+
+  <!-- Shopping Bag Body -->
+  <path d="M31 45 L35 94 C35.5 98.5 39 101 44 101 L76 101 C81 101 84.5 98.5 85 94 L89 45 Z" 
+        fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Graduation Cap (Mortarboard) Motif -->
+  <!-- Cap Diamond Top -->
+  <path d="M60 48 L88 59 L60 70 L32 59 Z" fill="url(#cgGoldGrad)" filter="url(#cgShadow)"/>
+  
+  <!-- Cap Band / Skullcap -->
+  <path d="M44 64.5 V72 C44 76 51 79 60 79 C69 79 76 76 76 72 V64.5" 
+        fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Tassel -->
+  <path d="M76 65 L88 71 V83" 
+        fill="none" stroke="url(#cgGoldGrad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="88" cy="84" r="2.5" fill="#fde047"/>
+
+  <!-- Smart Price / Savings Check Accent -->
+  <path d="M48 89 L56 96 L72 83" 
+        fill="none" stroke="url(#cgGoldGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
