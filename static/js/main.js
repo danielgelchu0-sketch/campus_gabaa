@@ -67,9 +67,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const pwaFloatingFab = document.getElementById('pwaFloatingFab');
   const pwaFabBtn = document.getElementById('pwaFabBtn');
   const pwaDirectTriggerBtn = document.getElementById('pwaDirectTriggerBtn');
-  const pwaPromptReadySection = document.getElementById('pwaPromptReadySection');
-  const pwaManualGuideSection = document.getElementById('pwaManualGuideSection');
+  const pwaOpenInChromeBtn = document.getElementById('pwaOpenInChromeBtn');
+  const pwaCopyLinkBtn = document.getElementById('pwaCopyLinkBtn');
+  const pwaStatusAlert = document.getElementById('pwaStatusAlert');
   const pwaInstallModalEl = document.getElementById('pwaInstallModal');
+
+  // Detect in-app webviews (e.g. Telegram, WhatsApp, Messenger, Facebook)
+  const isInAppBrowser = /FBAN|FBAV|Instagram|Telegram|WhatsApp|Line|Messenger/i.test(navigator.userAgent);
 
   // Check if app is installed (standalone mode or previous install recorded)
   const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
@@ -98,25 +102,52 @@ document.addEventListener('DOMContentLoaded', function () {
       if (pwaFloatingFab) pwaFloatingFab.classList.add('d-none');
     }
 
-    // Synchronize prompt ready section if prompt was captured early
-    function checkPromptReady() {
-      if (window.pwaDeferredPrompt && pwaPromptReadySection && pwaManualGuideSection) {
-        pwaPromptReadySection.classList.remove('d-none');
-        pwaManualGuideSection.classList.add('d-none');
-      }
+    // Configure In-App Browser Action Button
+    if (isInAppBrowser && pwaOpenInChromeBtn) {
+      pwaOpenInChromeBtn.classList.remove('d-none');
+      pwaOpenInChromeBtn.addEventListener('click', function () {
+        const fullUrl = window.location.href;
+        // Launch Android Chrome directly via intent URI
+        const chromeIntent = 'intent://' + window.location.host + window.location.pathname + window.location.search + '#Intent;scheme=https;package=com.android.chrome;end';
+        window.location.href = chromeIntent;
+      });
     }
 
-    checkPromptReady();
-    window.addEventListener('pwa-ready', checkPromptReady);
-    window.addEventListener('beforeinstallprompt', function (e) {
-      e.preventDefault();
-      window.pwaDeferredPrompt = e;
-      checkPromptReady();
-    });
+    // Configure Copy Link Button
+    if (pwaCopyLinkBtn) {
+      pwaCopyLinkBtn.addEventListener('click', function () {
+        const url = window.location.origin;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () {
+            const span = pwaCopyLinkBtn.querySelector('span');
+            if (span) span.textContent = 'Link Copied! Open Chrome & Paste';
+            setTimeout(function () {
+              if (span) span.textContent = 'Copy Webapp Link';
+            }, 3500);
+          });
+        }
+      });
+    }
 
     // Helper to open the modal reliably with bootstrap or pure JS fallback
     function showInstallModal() {
       if (!pwaInstallModalEl) return;
+
+      // Update status guidance based on environment
+      if (pwaStatusAlert) {
+        pwaStatusAlert.classList.remove('d-none');
+        if (isInAppBrowser) {
+          pwaStatusAlert.className = 'alert alert-warning py-2 px-3 small rounded-3 mb-3 text-center';
+          pwaStatusAlert.innerHTML = '<i class="bi bi-info-circle me-1"></i>You are viewing inside <strong>Telegram / WhatsApp</strong>. Tap <strong>"Open in Google Chrome"</strong> above to install!';
+        } else if (window.pwaDeferredPrompt) {
+          pwaStatusAlert.className = 'alert alert-success py-2 px-3 small rounded-3 mb-3 text-center';
+          pwaStatusAlert.innerHTML = '<i class="bi bi-check-circle me-1"></i>Ready! Tap <strong>"Install Campus Gabaa"</strong> below to confirm.';
+        } else {
+          pwaStatusAlert.className = 'alert alert-info py-2 px-3 small rounded-3 mb-3 text-center';
+          pwaStatusAlert.innerHTML = '<i class="bi bi-phone me-1"></i>Tap <strong>( ⋮ )</strong> in Chrome\'s top-right corner & select <strong>"Install app"</strong>.';
+        }
+      }
+
       try {
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
           const modal = bootstrap.Modal.getOrCreateInstance(pwaInstallModalEl);
@@ -133,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function () {
       pwaInstallModalEl.removeAttribute('aria-hidden');
       document.body.classList.add('modal-open');
 
-      // Backdrop
       let backdrop = document.getElementById('pwaModalBackdrop');
       if (!backdrop) {
         backdrop = document.createElement('div');
@@ -163,14 +193,13 @@ document.addEventListener('DOMContentLoaded', function () {
       if (backdrop) backdrop.remove();
     }
 
-    // Modal dismiss listener fallback
     if (pwaInstallModalEl) {
       pwaInstallModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (btn) {
         btn.addEventListener('click', closeInstallModal);
       });
     }
 
-    // Unified interactive installer trigger
+    // Unified installer trigger
     function triggerInstall(e) {
       if (e) {
         e.preventDefault();
@@ -188,17 +217,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const activePrompt = window.pwaDeferredPrompt;
       if (activePrompt) {
+        // Hide our bottom banner immediately so it doesn't overlap Chrome's native bottom-sheet
+        if (pwaInstallBanner) pwaInstallBanner.classList.add('d-none');
         closeInstallModal();
-        activePrompt.prompt();
-        activePrompt.userChoice.then(function (choiceResult) {
-          if (choiceResult.outcome === 'accepted') {
-            localStorage.setItem('pwa_installed', 'true');
-            hideAllInstallElements();
-          }
+
+        try {
+          activePrompt.prompt();
+          activePrompt.userChoice.then(function (choiceResult) {
+            if (choiceResult && choiceResult.outcome === 'accepted') {
+              localStorage.setItem('pwa_installed', 'true');
+              hideAllInstallElements();
+            }
+            window.pwaDeferredPrompt = null;
+          }).catch(function () {
+            window.pwaDeferredPrompt = null;
+          });
+        } catch (err) {
+          console.warn('Prompt error:', err);
           window.pwaDeferredPrompt = null;
-        });
+          showInstallModal();
+        }
       } else {
-        // Show universal interactive modal
+        // Show interactive installation wizard modal
         showInstallModal();
       }
     }

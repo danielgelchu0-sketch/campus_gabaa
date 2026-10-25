@@ -26,6 +26,13 @@
       window.pwaDeferredPrompt = e;
       window.dispatchEvent(new CustomEvent('pwa-ready'));
     });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .catch(function (err) {
+          console.warn('PWA SW error:', err);
+        });
+    }
   </script>
 
   <!-- Open Graph / Facebook / Telegram / WhatsApp -->
@@ -267,28 +274,35 @@
             </span>
           </div>
 
-          <div id="pwaPromptReadySection" class="d-none text-center mb-3">
-            <p class="text-muted small mb-3">
-              {% trans "Tap the button below to prompt your browser to add Campus Gabaa directly to your home screen:" %}
-            </p>
-            <button id="pwaDirectTriggerBtn" type="button" class="btn btn-warning btn-lg fw-bold rounded-pill px-4 shadow w-100 text-dark">
-              <i class="bi bi-download me-2"></i>{% trans "Install Now" %}
+          <!-- Action Buttons in Modal -->
+          <div class="d-flex flex-column gap-2 mb-3">
+            <button id="pwaDirectTriggerBtn" type="button" class="btn btn-warning btn-lg fw-bold rounded-pill px-4 shadow-sm w-100 text-dark">
+              <i class="bi bi-download me-2"></i>{% trans "Install Campus Gabaa" %}
+            </button>
+            <button id="pwaOpenInChromeBtn" type="button" class="btn btn-outline-success btn-md fw-bold rounded-pill px-3 w-100 d-none">
+              <i class="bi bi-browser-chrome me-2"></i>{% trans "Open in Google Chrome App" %}
+            </button>
+            <button id="pwaCopyLinkBtn" type="button" class="btn btn-light btn-sm rounded-pill px-3 w-100 border text-muted">
+              <i class="bi bi-clipboard me-1"></i><span>{% trans "Copy Webapp Link" %}</span>
             </button>
           </div>
 
+          <!-- Status Indicator -->
+          <div id="pwaStatusAlert" class="alert alert-info py-2 px-3 small rounded-3 d-none mb-3 text-center"></div>
+
           <div id="pwaManualGuideSection">
-            <p class="text-muted small mb-2 text-center">
-              {% trans "Follow these quick steps to install on your mobile device:" %}
+            <p class="text-muted smaller mb-2 text-center">
+              {% trans "Or install manually through your mobile browser:" %}
             </p>
             <div class="bg-light rounded-3 p-3 small border mb-3">
-              <div class="fw-bold text-success mb-2"><i class="bi bi-android2 me-1"></i>Android (Chrome / Brave / Edge):</div>
+              <div class="fw-bold text-success mb-2"><i class="bi bi-android2 me-1"></i>Android (Chrome / Brave):</div>
               <div class="d-flex align-items-start gap-2 mb-2">
                 <span class="badge bg-warning text-dark rounded-circle px-2 py-1">1</span>
-                <div>{% trans "Tap the three dots menu" %} <strong class="fs-6">( ⋮ )</strong> {% trans "in the top-right corner of Chrome." %}</div>
+                <div>{% trans "Tap the three dots menu" %} <strong class="fs-6">( ⋮ )</strong> {% trans "at the top-right." %}</div>
               </div>
               <div class="d-flex align-items-start gap-2">
                 <span class="badge bg-warning text-dark rounded-circle px-2 py-1">2</span>
-                <div>{% trans "Tap" %} <strong class="text-success">{% trans "'Install app'" %}</strong> {% trans "or" %} <strong>"{% trans 'Add to Home screen' %}"</strong>.</div>
+                <div>{% trans "Select" %} <strong class="text-success">{% trans "'Install app'" %}</strong> {% trans "or" %} <strong>"{% trans 'Add to Home screen' %}"</strong>.</div>
               </div>
             </div>
 
