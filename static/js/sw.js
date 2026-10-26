@@ -1,9 +1,9 @@
 /**
- * Campus Gabaa (GabaaHU) Service Worker
+ * Campus Gabaa (GabaaHU) Service Worker v2
  * Enables PWA installability, standalone home-screen mode, and offline asset caching.
  */
 
-const CACHE_NAME = 'campus-gabaa-cache-v1';
+const CACHE_NAME = 'campus-gabaa-cache-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/static/css/style.css',
@@ -14,7 +14,7 @@ const PRECACHE_ASSETS = [
   '/static/img/favicon.svg'
 ];
 
-// Install: Cache essential assets
+// Install: Cache essential assets & immediately activate
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -25,53 +25,49 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate: Clean old caches
+// Activate: Clean old caches and claim existing clients immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+          .map((name) => {
+            console.log('Purging legacy cache:', name);
+            return caches.delete(name);
+          })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch: Network-first for dynamic content, stale-while-revalidate for static assets
+// Fetch: Network-First for core scripts and styles to prevent stale cache lock-in
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
-  // For static assets (CSS, JS, images): cache first / stale-while-revalidate
+  // For static assets (CSS, JS, images): Network-First, fallback to Cache
   if (url.pathname.startsWith('/static/')) {
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          fetch(event.request).then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
-            }
-          }).catch(() => {});
-          return cachedResponse;
-        }
-        return fetch(event.request).then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200) {
-            return networkResponse;
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
           return networkResponse;
-        });
-      })
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
     );
     return;
   }
 
-  // For HTML navigation: Network-first, fallback to cache
+  // For HTML navigation: Network-First, fallback to cached home page
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {

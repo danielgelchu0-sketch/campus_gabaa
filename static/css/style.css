@@ -345,7 +345,9 @@ footer a:hover {
 #pwaInstallBtn,
 #pwaNavInstallBtn,
 #pwaFabBtn,
-#pwaDirectTriggerBtn {
+#pwaDirectTriggerBtn,
+#pwaOpenInChromeBtn,
+#pwaCopyLinkBtn {
   cursor: pointer;
   touch-action: manipulation;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
@@ -354,7 +356,30 @@ footer a:hover {
 #pwaInstallBtn:active,
 #pwaNavInstallBtn:active,
 #pwaFabBtn:active,
-#pwaDirectTriggerBtn:active {
-  transform: scale(0.95);
+#pwaDirectTriggerBtn:active,
+#pwaOpenInChromeBtn:active,
+#pwaCopyLinkBtn:active {
+  transform: scale(0.96);
   opacity: 0.85;
+}
+
+/* Dynamic PWA Interactive Guide Cards */
+.guide-card {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, transform 0.2s ease;
+}
+
+.guide-card-active {
+  border: 2px solid var(--hu-accent) !important;
+  background-color: #fffbeb !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2) !important;
+}
+
+.pwa-pulse-highlight {
+  animation: pulseGuideCard 0.8s ease-in-out 3;
+}
+
+@keyframes pulseGuideCard {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.35); }
+  100% { transform: scale(1); }
 }

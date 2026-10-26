@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const registerSW = function () {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then(function (registration) {
-          // Service worker successfully registered
+          // SW registered and active
         })
         .catch(function (err) {
           console.warn('PWA ServiceWorker registration error:', err);
@@ -58,9 +58,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // 5. In-App Standalone Mode & PWA Install Prompt Controller (Permanent until installed)
+  // 5. In-App Standalone Mode & Adaptive Progressive Installation Engine
   const pwaInstallBanner = document.getElementById('pwaInstallBanner');
   const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+  const pwaInstallBtnText = document.getElementById('pwaInstallBtnText');
   const pwaDismissBtn = document.getElementById('pwaDismissBtn');
   const pwaNavInstallItem = document.getElementById('pwaNavInstallItem');
   const pwaNavInstallBtn = document.getElementById('pwaNavInstallBtn');
@@ -72,10 +73,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const pwaStatusAlert = document.getElementById('pwaStatusAlert');
   const pwaInstallModalEl = document.getElementById('pwaInstallModal');
 
-  // Detect in-app webviews (e.g. Telegram, WhatsApp, Messenger, Facebook)
+  const pwaGuideAndroid = document.getElementById('pwaGuideAndroid');
+  const pwaAndroidBadge = document.getElementById('pwaAndroidBadge');
+  const pwaGuideIos = document.getElementById('pwaGuideIos');
+  const pwaIosBadge = document.getElementById('pwaIosBadge');
+  const pwaGuideDesktop = document.getElementById('pwaGuideDesktop');
+
+  // Device & Environment Detection
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isInAppBrowser = /FBAN|FBAV|Instagram|Telegram|WhatsApp|Line|Messenger/i.test(navigator.userAgent);
 
-  // Check if app is installed (standalone mode or previous install recorded)
+  // Check if app is installed (standalone display-mode or registered installation)
   const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
                       window.navigator.standalone === true ||
                       localStorage.getItem('pwa_installed') === 'true';
@@ -90,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (isInstalled) {
     hideAllInstallElements();
   } else {
-    // App is NOT installed -> Ensure persistent controls across all navigation and activities
+    // App is NOT installed -> Manage adaptive installation lifecycle
 
     // Check banner minimization state
     const isMinimized = sessionStorage.getItem('pwa_banner_minimized') === '1';
@@ -102,52 +111,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (pwaFloatingFab) pwaFloatingFab.classList.add('d-none');
     }
 
-    // Configure In-App Browser Action Button
-    if (isInAppBrowser && pwaOpenInChromeBtn) {
-      pwaOpenInChromeBtn.classList.remove('d-none');
-      pwaOpenInChromeBtn.addEventListener('click', function () {
-        const fullUrl = window.location.href;
-        // Launch Android Chrome directly via intent URI
-        const chromeIntent = 'intent://' + window.location.host + window.location.pathname + window.location.search + '#Intent;scheme=https;package=com.android.chrome;end';
-        window.location.href = chromeIntent;
-      });
-    }
-
-    // Configure Copy Link Button
-    if (pwaCopyLinkBtn) {
-      pwaCopyLinkBtn.addEventListener('click', function () {
-        const url = window.location.origin;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(url).then(function () {
-            const span = pwaCopyLinkBtn.querySelector('span');
-            if (span) span.textContent = 'Link Copied! Open Chrome & Paste';
-            setTimeout(function () {
-              if (span) span.textContent = 'Copy Webapp Link';
-            }, 3500);
-          });
-        }
-      });
-    }
-
-    // Helper to open the modal reliably with bootstrap or pure JS fallback
-    function showInstallModal() {
+    // Modal helpers (Bootstrap 5 modal with pure JS fallback)
+    function openModal() {
       if (!pwaInstallModalEl) return;
-
-      // Update status guidance based on environment
-      if (pwaStatusAlert) {
-        pwaStatusAlert.classList.remove('d-none');
-        if (isInAppBrowser) {
-          pwaStatusAlert.className = 'alert alert-warning py-2 px-3 small rounded-3 mb-3 text-center';
-          pwaStatusAlert.innerHTML = '<i class="bi bi-info-circle me-1"></i>You are viewing inside <strong>Telegram / WhatsApp</strong>. Tap <strong>"Open in Google Chrome"</strong> above to install!';
-        } else if (window.pwaDeferredPrompt) {
-          pwaStatusAlert.className = 'alert alert-success py-2 px-3 small rounded-3 mb-3 text-center';
-          pwaStatusAlert.innerHTML = '<i class="bi bi-check-circle me-1"></i>Ready! Tap <strong>"Install Campus Gabaa"</strong> below to confirm.';
-        } else {
-          pwaStatusAlert.className = 'alert alert-info py-2 px-3 small rounded-3 mb-3 text-center';
-          pwaStatusAlert.innerHTML = '<i class="bi bi-phone me-1"></i>Tap <strong>( ⋮ )</strong> in Chrome\'s top-right corner & select <strong>"Install app"</strong>.';
-        }
-      }
-
       try {
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
           const modal = bootstrap.Modal.getOrCreateInstance(pwaInstallModalEl);
@@ -155,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
       } catch (err) {
-        console.warn('Bootstrap modal error, using fallback:', err);
+        console.warn('Bootstrap modal error, using pure JS fallback:', err);
       }
 
       // Pure JS fallback
@@ -173,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    function closeInstallModal() {
+    function closeModal() {
       if (!pwaInstallModalEl) return;
       try {
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -195,60 +161,194 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (pwaInstallModalEl) {
       pwaInstallModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (btn) {
-        btn.addEventListener('click', closeInstallModal);
+        btn.addEventListener('click', closeModal);
       });
     }
 
-    // Unified installer trigger
-    function triggerInstall(e) {
+    // Dynamic UI State Renderer: adapts buttons and modal in real time
+    function renderInstallationState() {
+      const hasNativePrompt = Boolean(window.pwaDeferredPrompt);
+
+      if (hasNativePrompt) {
+        // STATE 1: Native 1-Tap Prompt is Ready
+        if (pwaInstallBtnText) pwaInstallBtnText.textContent = 'Install App (1-Tap)';
+        if (pwaDirectTriggerBtn) {
+          pwaDirectTriggerBtn.classList.remove('d-none');
+        }
+        if (pwaStatusAlert) {
+          pwaStatusAlert.classList.remove('d-none');
+          pwaStatusAlert.className = 'alert alert-success py-2 px-3 small rounded-3 mb-3 text-center';
+          pwaStatusAlert.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i><strong>Ready to Install!</strong> Tap <strong>"Install Campus Gabaa (1-Tap)"</strong> below.';
+        }
+      } else {
+        // STATE 2: Native Prompt Not Yet Dispatched or Unsupported (iOS, In-App, Cooldown, Firefox)
+        if (pwaInstallBtnText) pwaInstallBtnText.textContent = 'Install App';
+        if (pwaDirectTriggerBtn) {
+          pwaDirectTriggerBtn.classList.add('d-none'); // Hide the dead-end button so users are not trapped
+        }
+
+        // Configure environment-specific guidance
+        if (isInAppBrowser) {
+          if (pwaOpenInChromeBtn) pwaOpenInChromeBtn.classList.remove('d-none');
+          if (pwaStatusAlert) {
+            pwaStatusAlert.classList.remove('d-none');
+            pwaStatusAlert.className = 'alert alert-warning py-2 px-3 small rounded-3 mb-3 text-center';
+            pwaStatusAlert.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>You are viewing inside an in-app browser (Telegram/WhatsApp). Tap <strong>"Open in Google Chrome App"</strong> below to install!';
+          }
+        } else if (isIOS) {
+          if (pwaGuideIos) {
+            pwaGuideIos.classList.add('guide-card-active');
+            pwaGuideIos.classList.remove('d-none');
+          }
+          if (pwaIosBadge) pwaIosBadge.classList.remove('d-none');
+          if (pwaGuideAndroid) pwaGuideAndroid.classList.add('d-none');
+          if (pwaGuideDesktop) pwaGuideDesktop.classList.add('d-none');
+          if (pwaStatusAlert) {
+            pwaStatusAlert.classList.remove('d-none');
+            pwaStatusAlert.className = 'alert alert-primary py-2 px-3 small rounded-3 mb-3 text-center';
+            pwaStatusAlert.innerHTML = '<i class="bi bi-apple me-1"></i>To install on iOS: Follow the 2 steps below using Safari\'s Share button.';
+          }
+        } else if (isAndroid) {
+          if (pwaGuideAndroid) {
+            pwaGuideAndroid.classList.add('guide-card-active');
+            pwaGuideAndroid.classList.remove('d-none');
+          }
+          if (pwaAndroidBadge) pwaAndroidBadge.classList.remove('d-none');
+          if (pwaGuideIos) pwaGuideIos.classList.add('d-none');
+          if (pwaGuideDesktop) pwaGuideDesktop.classList.add('d-none');
+          if (pwaStatusAlert) {
+            pwaStatusAlert.classList.remove('d-none');
+            pwaStatusAlert.className = 'alert alert-info py-2 px-3 small rounded-3 mb-3 text-center';
+            pwaStatusAlert.innerHTML = '<i class="bi bi-android2 me-1"></i>Tap Chrome\'s <strong>( ⋮ )</strong> menu at the top-right &rarr; select <strong>"Install app"</strong>.';
+          }
+        } else {
+          // Desktop / PC
+          if (pwaGuideDesktop) {
+            pwaGuideDesktop.classList.add('guide-card-active');
+            pwaGuideDesktop.classList.remove('d-none');
+          }
+          if (pwaGuideAndroid) pwaGuideAndroid.classList.add('d-none');
+          if (pwaGuideIos) pwaGuideIos.classList.add('d-none');
+          if (pwaStatusAlert) {
+            pwaStatusAlert.classList.remove('d-none');
+            pwaStatusAlert.className = 'alert alert-secondary py-2 px-3 small rounded-3 mb-3 text-center';
+            pwaStatusAlert.innerHTML = '<i class="bi bi-laptop me-1"></i>Click the <strong>Install</strong> icon in your browser address bar.';
+          }
+        }
+      }
+    }
+
+    // Call state renderer immediately on page init
+    renderInstallationState();
+
+    // Listen for custom 'pwa-ready' or native 'beforeinstallprompt' to instantly upgrade UI
+    window.addEventListener('pwa-ready', renderInstallationState);
+    window.addEventListener('beforeinstallprompt', renderInstallationState);
+
+    // Primary action dispatcher: handles clicks on any install button
+    function handleInstallTrigger(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
 
-      // Visual tap response feedback
+      // Visual tap confirmation feedback
       const targetBtn = (e && e.currentTarget) || pwaInstallBtn;
       if (targetBtn) {
         targetBtn.classList.add('opacity-75');
         setTimeout(function () {
           targetBtn.classList.remove('opacity-75');
-        }, 300);
+        }, 250);
       }
 
       const activePrompt = window.pwaDeferredPrompt;
-      if (activePrompt) {
-        // Hide our bottom banner immediately so it doesn't overlap Chrome's native bottom-sheet
-        if (pwaInstallBanner) pwaInstallBanner.classList.add('d-none');
-        closeInstallModal();
 
+      if (activePrompt) {
+        // We have the native Chromium BeforeInstallPromptEvent -> Invoke native installer dialog
         try {
           activePrompt.prompt();
-          activePrompt.userChoice.then(function (choiceResult) {
-            if (choiceResult && choiceResult.outcome === 'accepted') {
-              localStorage.setItem('pwa_installed', 'true');
-              hideAllInstallElements();
-            }
-            window.pwaDeferredPrompt = null;
-          }).catch(function () {
-            window.pwaDeferredPrompt = null;
-          });
+          activePrompt.userChoice
+            .then(function (choiceResult) {
+              if (choiceResult && choiceResult.outcome === 'accepted') {
+                localStorage.setItem('pwa_installed', 'true');
+                hideAllInstallElements();
+                closeModal();
+              } else {
+                // User clicked 'Cancel' on Chrome's native sheet: gracefully fall back to guided state
+                window.pwaDeferredPrompt = null;
+                renderInstallationState();
+              }
+            })
+            .catch(function (err) {
+              console.warn('Native prompt userChoice error:', err);
+              window.pwaDeferredPrompt = null;
+              renderInstallationState();
+            });
         } catch (err) {
-          console.warn('Prompt error:', err);
+          console.warn('Native prompt execution error:', err);
           window.pwaDeferredPrompt = null;
-          showInstallModal();
+          renderInstallationState();
+          openModal();
         }
       } else {
-        // Show interactive installation wizard modal
-        showInstallModal();
+        // Native prompt is not available -> Open interactive guided walkthrough modal
+        openModal();
+
+        // Highlight the active card with a gentle pulse animation to focus attention
+        const activeCard = document.querySelector('.guide-card-active');
+        if (activeCard) {
+          activeCard.classList.remove('pwa-pulse-highlight');
+          void activeCard.offsetWidth; // Force reflow
+          activeCard.classList.add('pwa-pulse-highlight');
+        }
       }
     }
 
-    // Attach click and touch listeners to all permanent install buttons
+    // Attach listener to all install triggers
     [pwaInstallBtn, pwaNavInstallBtn, pwaFabBtn, pwaDirectTriggerBtn].forEach(function (btn) {
       if (btn) {
-        btn.addEventListener('click', triggerInstall);
+        btn.addEventListener('click', handleInstallTrigger);
       }
     });
+
+    // In-App browser launcher: launches real Google Chrome via Android Intent
+    if (pwaOpenInChromeBtn) {
+      pwaOpenInChromeBtn.addEventListener('click', function () {
+        const fullUrl = window.location.href;
+        const chromeIntent = 'intent://' + window.location.host + window.location.pathname + window.location.search + '#Intent;scheme=https;package=com.android.chrome;end';
+        window.location.href = chromeIntent;
+      });
+    }
+
+    // Universal Copy Link Button: copies link with responsive visual feedback
+    if (pwaCopyLinkBtn) {
+      pwaCopyLinkBtn.addEventListener('click', function () {
+        const url = window.location.origin;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () {
+            const span = pwaCopyLinkBtn.querySelector('span');
+            if (span) span.textContent = '✓ Link Copied! Open Chrome & Paste';
+            pwaCopyLinkBtn.classList.replace('btn-light', 'btn-success');
+            pwaCopyLinkBtn.classList.remove('text-muted');
+            pwaCopyLinkBtn.classList.add('text-white');
+            setTimeout(function () {
+              if (span) span.textContent = 'Copy Webapp Link';
+              pwaCopyLinkBtn.classList.replace('btn-success', 'btn-light');
+              pwaCopyLinkBtn.classList.remove('text-white');
+              pwaCopyLinkBtn.classList.add('text-muted');
+            }, 3500);
+          }).catch(function () {
+            fallbackPromptCopy(url);
+          });
+        } else {
+          fallbackPromptCopy(url);
+        }
+      });
+    }
+
+    function fallbackPromptCopy(url) {
+      prompt('Copy the web app link below, then open Google Chrome and paste:', url);
+    }
 
     // Minimize bottom banner into floating pill button
     if (pwaDismissBtn) {
